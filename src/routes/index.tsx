@@ -50,14 +50,12 @@ function Landing() {
             Refine
           </Link>
           <nav className="flex items-center gap-2">
-            <Link to="/auth">
-              <Button variant="ghost" size="sm">
-                Sign in
-              </Button>
-            </Link>
-            <Link to="/auth">
-              <Button size="sm">Get started</Button>
-            </Link>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/auth">Sign in</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link to="/auth">Get started</Link>
+            </Button>
           </nav>
         </div>
       </header>

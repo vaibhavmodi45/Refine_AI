@@ -14,7 +14,170 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analyses: {
+        Row: {
+          ats_score: number | null
+          created_at: string
+          id: string
+          improvements: Json | null
+          job_description_id: string | null
+          keyword_report: Json | null
+          match_score: number | null
+          missing_skills: Json | null
+          resume_version_id: string
+        }
+        Insert: {
+          ats_score?: number | null
+          created_at?: string
+          id?: string
+          improvements?: Json | null
+          job_description_id?: string | null
+          keyword_report?: Json | null
+          match_score?: number | null
+          missing_skills?: Json | null
+          resume_version_id: string
+        }
+        Update: {
+          ats_score?: number | null
+          created_at?: string
+          id?: string
+          improvements?: Json | null
+          job_description_id?: string | null
+          keyword_report?: Json | null
+          match_score?: number | null
+          missing_skills?: Json | null
+          resume_version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analyses_job_description_id_fkey"
+            columns: ["job_description_id"]
+            isOneToOne: false
+            referencedRelation: "job_descriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analyses_resume_version_id_fkey"
+            columns: ["resume_version_id"]
+            isOneToOne: false
+            referencedRelation: "resume_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_descriptions: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          title?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      resume_versions: {
+        Row: {
+          created_at: string
+          id: string
+          is_current: boolean
+          label: string
+          resume_id: string
+          structured_data: Json
+          template: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          label?: string
+          resume_id: string
+          structured_data: Json
+          template?: string
+          version_number?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          label?: string
+          resume_id?: string
+          structured_data?: Json
+          template?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_versions_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resumes: {
+        Row: {
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

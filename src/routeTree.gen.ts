@@ -14,6 +14,10 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedResumeNewRouteImport } from './routes/_authenticated/resume.new'
+import { Route as AuthenticatedResumeIdUploadRouteImport } from './routes/_authenticated/resume.$id.upload'
+import { Route as AuthenticatedResumeIdOptimizeRouteImport } from './routes/_authenticated/resume.$id.optimize'
+import { Route as AuthenticatedResumeIdExportRouteImport } from './routes/_authenticated/resume.$id.export'
+import { Route as AuthenticatedResumeIdEditRouteImport } from './routes/_authenticated/resume.$id.edit'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -39,18 +43,50 @@ const AuthenticatedResumeNewRoute = AuthenticatedResumeNewRouteImport.update({
   path: '/resume/new',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedResumeIdUploadRoute =
+  AuthenticatedResumeIdUploadRouteImport.update({
+    id: '/resume/$id/upload',
+    path: '/resume/$id/upload',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedResumeIdOptimizeRoute =
+  AuthenticatedResumeIdOptimizeRouteImport.update({
+    id: '/resume/$id/optimize',
+    path: '/resume/$id/optimize',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedResumeIdExportRoute =
+  AuthenticatedResumeIdExportRouteImport.update({
+    id: '/resume/$id/export',
+    path: '/resume/$id/export',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedResumeIdEditRoute =
+  AuthenticatedResumeIdEditRouteImport.update({
+    id: '/resume/$id/edit',
+    path: '/resume/$id/edit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/resume/new': typeof AuthenticatedResumeNewRoute
+  '/resume/$id/edit': typeof AuthenticatedResumeIdEditRoute
+  '/resume/$id/export': typeof AuthenticatedResumeIdExportRoute
+  '/resume/$id/optimize': typeof AuthenticatedResumeIdOptimizeRoute
+  '/resume/$id/upload': typeof AuthenticatedResumeIdUploadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/resume/new': typeof AuthenticatedResumeNewRoute
+  '/resume/$id/edit': typeof AuthenticatedResumeIdEditRoute
+  '/resume/$id/export': typeof AuthenticatedResumeIdExportRoute
+  '/resume/$id/optimize': typeof AuthenticatedResumeIdOptimizeRoute
+  '/resume/$id/upload': typeof AuthenticatedResumeIdUploadRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +95,32 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/resume/new': typeof AuthenticatedResumeNewRoute
+  '/_authenticated/resume/$id/edit': typeof AuthenticatedResumeIdEditRoute
+  '/_authenticated/resume/$id/export': typeof AuthenticatedResumeIdExportRoute
+  '/_authenticated/resume/$id/optimize': typeof AuthenticatedResumeIdOptimizeRoute
+  '/_authenticated/resume/$id/upload': typeof AuthenticatedResumeIdUploadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/resume/new'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/resume/new'
+    | '/resume/$id/edit'
+    | '/resume/$id/export'
+    | '/resume/$id/optimize'
+    | '/resume/$id/upload'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/resume/new'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/resume/new'
+    | '/resume/$id/edit'
+    | '/resume/$id/export'
+    | '/resume/$id/optimize'
+    | '/resume/$id/upload'
   id:
     | '__root__'
     | '/'
@@ -72,6 +128,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/_authenticated/resume/new'
+    | '/_authenticated/resume/$id/edit'
+    | '/_authenticated/resume/$id/export'
+    | '/_authenticated/resume/$id/optimize'
+    | '/_authenticated/resume/$id/upload'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -117,17 +177,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedResumeNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/resume/$id/upload': {
+      id: '/_authenticated/resume/$id/upload'
+      path: '/resume/$id/upload'
+      fullPath: '/resume/$id/upload'
+      preLoaderRoute: typeof AuthenticatedResumeIdUploadRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/resume/$id/optimize': {
+      id: '/_authenticated/resume/$id/optimize'
+      path: '/resume/$id/optimize'
+      fullPath: '/resume/$id/optimize'
+      preLoaderRoute: typeof AuthenticatedResumeIdOptimizeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/resume/$id/export': {
+      id: '/_authenticated/resume/$id/export'
+      path: '/resume/$id/export'
+      fullPath: '/resume/$id/export'
+      preLoaderRoute: typeof AuthenticatedResumeIdExportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/resume/$id/edit': {
+      id: '/_authenticated/resume/$id/edit'
+      path: '/resume/$id/edit'
+      fullPath: '/resume/$id/edit'
+      preLoaderRoute: typeof AuthenticatedResumeIdEditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedResumeNewRoute: typeof AuthenticatedResumeNewRoute
+  AuthenticatedResumeIdEditRoute: typeof AuthenticatedResumeIdEditRoute
+  AuthenticatedResumeIdExportRoute: typeof AuthenticatedResumeIdExportRoute
+  AuthenticatedResumeIdOptimizeRoute: typeof AuthenticatedResumeIdOptimizeRoute
+  AuthenticatedResumeIdUploadRoute: typeof AuthenticatedResumeIdUploadRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedResumeNewRoute: AuthenticatedResumeNewRoute,
+  AuthenticatedResumeIdEditRoute: AuthenticatedResumeIdEditRoute,
+  AuthenticatedResumeIdExportRoute: AuthenticatedResumeIdExportRoute,
+  AuthenticatedResumeIdOptimizeRoute: AuthenticatedResumeIdOptimizeRoute,
+  AuthenticatedResumeIdUploadRoute: AuthenticatedResumeIdUploadRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -141,3 +237,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

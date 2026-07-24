@@ -175,7 +175,7 @@ function UploadPage() {
               />
             </div>
             <Card className="max-h-[calc(100vh-220px)] overflow-auto bg-muted/40 p-4">
-              <div className="mx-auto flex justify-center">
+              <div className="resume-preview-frame">
                 <div className="resume-preview-scale">
                   <TemplateRenderer data={parsed} template={template} />
                 </div>

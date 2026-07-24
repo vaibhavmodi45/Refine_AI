@@ -50,14 +50,12 @@ function Landing() {
             Refine
           </Link>
           <nav className="flex items-center gap-2">
-            <Link to="/auth">
-              <Button variant="ghost" size="sm">
-                Sign in
-              </Button>
-            </Link>
-            <Link to="/auth">
-              <Button size="sm">Get started</Button>
-            </Link>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/auth">Sign in</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link to="/auth">Get started</Link>
+            </Button>
           </nav>
         </div>
       </header>
@@ -75,14 +73,12 @@ function Landing() {
             descriptions. Rule-based scoring you can trust — AI only rewords, never invents.
           </p>
           <div className="mt-8 flex justify-center gap-3">
-            <Link to="/auth">
-              <Button size="lg">Build my resume</Button>
-            </Link>
-            <a href="#how">
-              <Button size="lg" variant="outline">
-                How it works
-              </Button>
-            </a>
+            <Button asChild size="lg">
+              <Link to="/auth">Build my resume</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <a href="#how">How it works</a>
+            </Button>
           </div>
         </div>
       </section>

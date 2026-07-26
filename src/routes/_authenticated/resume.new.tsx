@@ -92,8 +92,10 @@ function NewResume() {
       </Card>
 
       <div className="min-h-[700px] overflow-auto rounded-xl border bg-muted/40 p-6">
-        <div className="mx-auto w-fit shadow-xl">
-          <TemplateRenderer data={previewData} template={template} />
+        <div className="resume-preview-frame">
+          <div className="resume-preview-scale">
+            <TemplateRenderer data={previewData} template={template} />
+          </div>
         </div>
       </div>
     </div>

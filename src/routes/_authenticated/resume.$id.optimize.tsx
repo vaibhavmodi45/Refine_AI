@@ -126,6 +126,21 @@ function OptimizePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [suggestions.map((s) => s.id).join(",")]);
 
+  // Semantic matches AI found — used to visually strike-through Type B / missing skills.
+  const aiCoveredSet = useMemo(() => {
+    const s = new Set<string>();
+    (aiResult?.semanticMatches ?? []).forEach((m) => s.add(m.jdTerm.toLowerCase()));
+    return s;
+  }, [aiResult]);
+
+  const displayedSuggestions = useMemo(() => {
+    if (!aiEnabled || !aiResult) return suggestions;
+    // Hide Type B suggestions that AI reports as semantically already covered.
+    return suggestions.filter(
+      (s) => !(s.type === "B" && aiCoveredSet.has(s.keyword.toLowerCase())),
+    );
+  }, [suggestions, aiEnabled, aiResult, aiCoveredSet]);
+
   const grouped = useMemo(() => {
     const g: Record<SectionGroup, Suggestion[]> = {
       Summary: [],
@@ -133,15 +148,46 @@ function OptimizePage() {
       Projects: [],
       Skills: [],
     };
-    for (const s of suggestions) g[s.section].push(s);
+    for (const s of displayedSuggestions) g[s.section].push(s);
     return g;
-  }, [suggestions]);
+  }, [displayedSuggestions]);
 
-  const selectedACount = suggestions.filter((s) => s.type === "A" && includeA[s.id]).length;
-  const confirmedBCount = suggestions.filter(
+  const selectedACount = displayedSuggestions.filter((s) => s.type === "A" && includeA[s.id]).length;
+  const confirmedBCount = displayedSuggestions.filter(
     (s) => s.type === "B" && bState[s.id]?.confirmed && bState[s.id]?.wording.trim(),
   ).length;
   const totalSelected = selectedACount + confirmedBCount;
+
+  // Debounced AI call when enabled and JD changes.
+  useEffect(() => {
+    if (!aiEnabled || !data || !jd.trim() || jd.trim().length < 40) {
+      setAiResult(null);
+      return;
+    }
+    const missing = result?.missingSkills ?? [];
+    let cancelled = false;
+    setAiLoading(true);
+    const t = setTimeout(async () => {
+      try {
+        const res = await runAi({ data: { resume: data, jd, missingSkills: missing } });
+        if (!cancelled) setAiResult(res);
+      } catch (e) {
+        if (!cancelled) {
+          setAiResult(null);
+          toast.error("AI-enhanced analysis is unavailable right now — showing deterministic results.");
+          console.error("AI enhance failed:", e);
+        }
+      } finally {
+        if (!cancelled) setAiLoading(false);
+      }
+    }, 900);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aiEnabled, jd, current?.id]);
+
 
   async function doSave(mode: "overwrite" | "new") {
     if (!data || !current) return;

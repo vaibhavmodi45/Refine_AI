@@ -193,7 +193,7 @@ function OptimizePage() {
     if (!data || !current) return;
     setSaving(true);
     try {
-      const selectedA = suggestions.filter(
+      const selectedA = displayedSuggestions.filter(
         (s): s is SuggestionA => s.type === "A" && !!includeA[s.id],
       );
       const safety = verifyTypeASafety(data, selectedA);
@@ -202,7 +202,7 @@ function OptimizePage() {
         setSaving(false);
         return;
       }
-      const confirmedB: ConfirmedTypeB[] = suggestions
+      const confirmedB: ConfirmedTypeB[] = displayedSuggestions
         .filter((s): s is Extract<Suggestion, { type: "B" }> => s.type === "B")
         .filter((s) => bState[s.id]?.confirmed && bState[s.id]?.wording.trim())
         .map((s) => {

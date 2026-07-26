@@ -176,14 +176,18 @@ function EditResume() {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(380px,480px)_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[minmax(360px,460px)_1fr]">
         <div className="max-h-[calc(100vh-160px)] overflow-auto pr-1">
           <ResumeEditor data={data} setData={(fn) => setData((d) => (d ? fn(d) : d))} template={template} onTemplateChange={setTemplate} />
         </div>
         <Card className="max-h-[calc(100vh-160px)] overflow-auto bg-muted/40 p-4">
           {previewData && (
-            <div ref={previewRef} className="mx-auto w-fit shadow-xl">
-              <TemplateRenderer data={previewData} template={template} />
+            <div className="resume-preview-frame">
+              <div className="resume-preview-scale">
+                <div ref={previewRef}>
+                  <TemplateRenderer data={previewData} template={template} />
+                </div>
+              </div>
             </div>
           )}
           <div className="mt-3 text-center">

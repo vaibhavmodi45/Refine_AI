@@ -85,6 +85,11 @@ function OptimizePage() {
   const [postSaveScore, setPostSaveScore] = useState<ScoringResult | null>(null);
   const [beforeScore, setBeforeScore] = useState<ScoringResult | null>(null);
   const [confirmBOpen, setConfirmBOpen] = useState<string | null>(null);
+  // AI-enhanced analysis (opt-in)
+  const [aiEnabled, setAiEnabled] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState<AiEnhanceResult | null>(null);
+  const runAi = useServerFn(aiEnhanceAnalysis);
 
   const current = q.data?.versions.find((v) => v.is_current) ?? q.data?.versions[0];
   const template: TemplateId = (current?.template as TemplateId) ?? "classic";

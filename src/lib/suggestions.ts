@@ -212,9 +212,9 @@ export function generateSuggestions(resume: ResumeData, jd: string): Suggestion[
     }
   }
 
-  // Type B: missing skills (from scorer), never auto-add.
+  // Type B: missing skills (from scorer), never auto-add. Guarded again here.
   for (const m of score.missingSkills) {
-    // skip if we already have a Type A that covers it (already in text)
+    if (!isRealSkill(m)) continue;
     if (resumeTextLower.includes(m.toLowerCase())) continue;
     suggestions.push({
       id: uid(),

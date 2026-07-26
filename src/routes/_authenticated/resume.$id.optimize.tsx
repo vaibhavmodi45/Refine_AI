@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getResume, saveResumeVersion } from "@/lib/resume.functions";
+import { aiEnhanceAnalysis, type AiEnhanceResult } from "@/lib/ai-enhance.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -41,7 +43,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Sparkles, Target, TrendingUp, AlertCircle, CheckCircle2, Wand2 } from "lucide-react";
+import { ArrowLeft, Sparkles, Target, TrendingUp, AlertCircle, CheckCircle2, Wand2, Loader2, Brain } from "lucide-react";
 import { resumeDataSchema, type ResumeData, type TemplateId } from "@/lib/resume-schema";
 import { scoreResumeAgainstJob, type ScoringResult } from "@/lib/scoring";
 import {

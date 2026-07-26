@@ -432,7 +432,7 @@ function OptimizePage() {
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge variant="secondary" className="font-mono text-xs">{m.jdTerm}</Badge>
                           <span className="text-xs text-muted-foreground">covered by</span>
-                          <span className="text-xs font-medium">"{m.resumeEvidence}"</span>
+                          <span className="text-xs font-medium">"{m.evidence}"</span>
                         </div>
                       </li>
                     ))}

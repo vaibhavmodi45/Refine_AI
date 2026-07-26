@@ -109,11 +109,9 @@ export function generateSuggestions(resume: ResumeData, jd: string): Suggestion[
   let seq = 0;
   const uid = () => `s${++seq}`;
 
-  // Deduplicate keywords
+  // Deduplicate keywords — only actual technical skills, never degrees or generic words.
   const jdSkillKeywords = Array.from(
-    new Set(
-      tokenize(jd).filter((t) => SKILL_HINTS.has(t) || /[+#.]/.test(t)),
-    ),
+    new Set(tokenize(jd).filter(isRealSkill)),
   );
 
   for (const kw of jdSkillKeywords) {

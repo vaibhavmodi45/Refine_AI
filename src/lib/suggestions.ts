@@ -3,21 +3,35 @@ import { scoreResumeAgainstJob } from "./scoring";
 
 // Reuse the same tokenizer/skill hints as scoring for consistency.
 const STOPWORDS = new Set(
-  "a about above after again against all am an and any are as at be because been before being below between both but by can did do does doing down during each few for from further had has have having he her here hers herself him himself his how i if in into is it its itself just me more most my myself no nor not now of off on once only or other our ours ourselves out over own same she should so some such than that the their theirs them themselves then there these they this those through to too under until up very was we were what when where which while who whom why will with you your yours yourself yourselves".split(
+  "a about above after again against all am an and any are as at be because been before being below between both but by can did do does doing down during each few for from further had has have having he her here hers herself him himself his how i if in into is it its itself just me more most my myself no nor not now of off on once only or other our ours ourselves out over own same she should so some such than that the their theirs them themselves then there these they this those through to too under until up very was we were what when where which while who whom why will with you your yours yourself yourselves solutions solution team teams experience experienced experiences responsible responsibility responsibilities strong excellent proven demonstrated ability abilities skill skills work working works knowledge understanding etc various multiple several including include includes included ensure ensures ensured across within throughout using use used uses new existing overall able capable required requires requirement requirements plus preferred nice must candidate candidates role roles position positions company companies industry industries business businesses stakeholder stakeholders customer customers client clients user users product products project projects development developing develop developed manage managed managing management lead leads leading led environment environments year years month months day days full part time based good great fast quick clear effective efficient successful successfully high highly deep broad complex simple standard modern legacy end-to-end hands-on hands cross cross-functional day-to-day".split(
+    /\s+/,
+  ),
+);
+
+const NON_SKILL_TOKENS = new Set(
+  "b.tech b.s. b.a. b.e. m.s. m.a. m.e. ph.d. ph.d bsc msc mba btech mtech u.s. u.k. e.g. i.e. etc. a.m. p.m. inc. corp. ltd. co. jr. sr. no. vs. mr. ms. dr. approx. incl. mgr.".split(
     /\s+/,
   ),
 );
 
 const SKILL_HINTS = new Set(
-  "javascript typescript python java go rust c++ c# ruby php scala kotlin swift react vue angular svelte next node express nestjs graphql rest api sql nosql postgres postgresql mysql mongodb redis elasticsearch aws gcp azure docker kubernetes terraform ansible ci cd git jenkins github gitlab linux bash figma agile scrum jira product design ux ui accessibility a11y seo html css tailwind sass tanstack vite webpack rollup esbuild jest vitest playwright cypress fastapi django flask rails spring dotnet .net firebase supabase snowflake bigquery airflow spark hadoop kafka rabbitmq websocket restful microservices oauth jwt saml oidc security tdd bdd analytics tableau powerbi power-bi excel machine-learning ml ai nlp llm rag pytorch tensorflow numpy pandas scikit-learn opencv".split(
+  "javascript typescript python java go rust ruby php scala kotlin swift react vue angular svelte next nextjs node nodejs express nestjs graphql rest api sql nosql postgres postgresql mysql mongodb redis elasticsearch aws gcp azure docker kubernetes terraform ansible ci cd git jenkins github gitlab linux bash figma agile scrum jira kanban product design ux ui accessibility a11y seo html css tailwind sass scss less tanstack vite webpack rollup esbuild jest vitest playwright cypress fastapi django flask rails spring dotnet firebase supabase snowflake bigquery airflow spark hadoop kafka rabbitmq websocket restful microservices oauth jwt saml oidc security tdd bdd analytics tableau powerbi excel machine-learning ml ai nlp llm rag pytorch tensorflow numpy pandas scikit-learn opencv redux zustand nextauth prisma sequelize typeorm drizzle mongoose serverless lambda ec2 s3 rds cloudfront cloudflare vercel netlify heroku datadog sentry grafana prometheus splunk okta auth0 stripe twilio sendgrid mailgun sketch storybook chromatic swagger openapi grpc protobuf websockets webrtc pwa spa ssr ssg csr rxjs mobx recoil apollo urql trpc hasura strapi contentful sanity wordpress shopify magento salesforce hubspot workday sap oracle notion asana intellij vscode xcode android-studio flutter dart ionic expo unity unreal blender solidity ethereum web3 solana perl haskell elixir erlang lua julia matlab".split(
     /\s+/,
   ),
 );
+const PUNCT_SKILL_TOKENS = new Set([
+  "c++", "c#", ".net", "node.js", "next.js", "vue.js", "d3.js", "three.js", "f#", "objective-c",
+]);
 
 function tokenize(text: string): string[] {
-  return (text.toLowerCase().match(/[a-z0-9+#.\-]+/g) ?? []).filter(
-    (t) => t.length > 1 && !STOPWORDS.has(t),
-  );
+  return (text.toLowerCase().match(/[a-z0-9+#.\-]+/g) ?? [])
+    .map((t) => t.replace(/^[.\-]+|[.\-]+$/g, ""))
+    .filter((t) => t.length > 1 && !STOPWORDS.has(t));
+}
+
+function isRealSkill(t: string): boolean {
+  if (NON_SKILL_TOKENS.has(t)) return false;
+  return SKILL_HINTS.has(t) || PUNCT_SKILL_TOKENS.has(t);
 }
 
 // Find the exact-case form of a keyword as it appears in the JD (preferred casing).
@@ -95,11 +109,9 @@ export function generateSuggestions(resume: ResumeData, jd: string): Suggestion[
   let seq = 0;
   const uid = () => `s${++seq}`;
 
-  // Deduplicate keywords
+  // Deduplicate keywords — only actual technical skills, never degrees or generic words.
   const jdSkillKeywords = Array.from(
-    new Set(
-      tokenize(jd).filter((t) => SKILL_HINTS.has(t) || /[+#.]/.test(t)),
-    ),
+    new Set(tokenize(jd).filter(isRealSkill)),
   );
 
   for (const kw of jdSkillKeywords) {
@@ -200,9 +212,9 @@ export function generateSuggestions(resume: ResumeData, jd: string): Suggestion[
     }
   }
 
-  // Type B: missing skills (from scorer), never auto-add.
+  // Type B: missing skills (from scorer), never auto-add. Guarded again here.
   for (const m of score.missingSkills) {
-    // skip if we already have a Type A that covers it (already in text)
+    if (!isRealSkill(m)) continue;
     if (resumeTextLower.includes(m.toLowerCase())) continue;
     suggestions.push({
       id: uid(),

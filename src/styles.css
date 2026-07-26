@@ -148,8 +148,12 @@
   display: flex;
   justify-content: center;
 }
-/* Fluid scale down: 100% at ≥8.5in (816px), scale down proportionally below. */
-@container (max-width: 816px) {
-  .resume-preview-scale { transform: scale(calc(100cqw / 816)); }
+/* Scale down proportionally when the container is narrower than 8.5in (816px).
+   Reserve the scaled height so the parent doesn't leave/collide with empty space. */
+@container (max-width: 815px) {
+  .resume-preview-scale {
+    transform: scale(calc(100cqw / 816));
+    height: calc(11in * (100cqw / 816));
+  }
 }
 

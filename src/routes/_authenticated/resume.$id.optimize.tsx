@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getResume, saveResumeVersion } from "@/lib/resume.functions";
+import { aiEnhanceAnalysis, type AiEnhanceResult } from "@/lib/ai-enhance.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -41,7 +43,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Sparkles, Target, TrendingUp, AlertCircle, CheckCircle2, Wand2 } from "lucide-react";
+import { ArrowLeft, Sparkles, Target, TrendingUp, AlertCircle, CheckCircle2, Wand2, Loader2, Brain } from "lucide-react";
 import { resumeDataSchema, type ResumeData, type TemplateId } from "@/lib/resume-schema";
 import { scoreResumeAgainstJob, type ScoringResult } from "@/lib/scoring";
 import {
@@ -83,6 +85,11 @@ function OptimizePage() {
   const [postSaveScore, setPostSaveScore] = useState<ScoringResult | null>(null);
   const [beforeScore, setBeforeScore] = useState<ScoringResult | null>(null);
   const [confirmBOpen, setConfirmBOpen] = useState<string | null>(null);
+  // AI-enhanced analysis (opt-in)
+  const [aiEnabled, setAiEnabled] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState<AiEnhanceResult | null>(null);
+  const runAi = useServerFn(aiEnhanceAnalysis);
 
   const current = q.data?.versions.find((v) => v.is_current) ?? q.data?.versions[0];
   const template: TemplateId = (current?.template as TemplateId) ?? "classic";
@@ -119,6 +126,21 @@ function OptimizePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [suggestions.map((s) => s.id).join(",")]);
 
+  // Semantic matches AI found — used to visually strike-through Type B / missing skills.
+  const aiCoveredSet = useMemo(() => {
+    const s = new Set<string>();
+    (aiResult?.semanticMatches ?? []).forEach((m) => s.add(m.jdTerm.toLowerCase()));
+    return s;
+  }, [aiResult]);
+
+  const displayedSuggestions = useMemo(() => {
+    if (!aiEnabled || !aiResult) return suggestions;
+    // Hide Type B suggestions that AI reports as semantically already covered.
+    return suggestions.filter(
+      (s) => !(s.type === "B" && aiCoveredSet.has(s.keyword.toLowerCase())),
+    );
+  }, [suggestions, aiEnabled, aiResult, aiCoveredSet]);
+
   const grouped = useMemo(() => {
     const g: Record<SectionGroup, Suggestion[]> = {
       Summary: [],
@@ -126,21 +148,52 @@ function OptimizePage() {
       Projects: [],
       Skills: [],
     };
-    for (const s of suggestions) g[s.section].push(s);
+    for (const s of displayedSuggestions) g[s.section].push(s);
     return g;
-  }, [suggestions]);
+  }, [displayedSuggestions]);
 
-  const selectedACount = suggestions.filter((s) => s.type === "A" && includeA[s.id]).length;
-  const confirmedBCount = suggestions.filter(
+  const selectedACount = displayedSuggestions.filter((s) => s.type === "A" && includeA[s.id]).length;
+  const confirmedBCount = displayedSuggestions.filter(
     (s) => s.type === "B" && bState[s.id]?.confirmed && bState[s.id]?.wording.trim(),
   ).length;
   const totalSelected = selectedACount + confirmedBCount;
+
+  // Debounced AI call when enabled and JD changes.
+  useEffect(() => {
+    if (!aiEnabled || !data || !jd.trim() || jd.trim().length < 40) {
+      setAiResult(null);
+      return;
+    }
+    const missing = result?.missingSkills ?? [];
+    let cancelled = false;
+    setAiLoading(true);
+    const t = setTimeout(async () => {
+      try {
+        const res = await runAi({ data: { resume: data, jd, missingSkills: missing } });
+        if (!cancelled) setAiResult(res);
+      } catch (e) {
+        if (!cancelled) {
+          setAiResult(null);
+          toast.error("AI-enhanced analysis is unavailable right now — showing deterministic results.");
+          console.error("AI enhance failed:", e);
+        }
+      } finally {
+        if (!cancelled) setAiLoading(false);
+      }
+    }, 900);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aiEnabled, jd, current?.id]);
+
 
   async function doSave(mode: "overwrite" | "new") {
     if (!data || !current) return;
     setSaving(true);
     try {
-      const selectedA = suggestions.filter(
+      const selectedA = displayedSuggestions.filter(
         (s): s is SuggestionA => s.type === "A" && !!includeA[s.id],
       );
       const safety = verifyTypeASafety(data, selectedA);
@@ -149,7 +202,7 @@ function OptimizePage() {
         setSaving(false);
         return;
       }
-      const confirmedB: ConfirmedTypeB[] = suggestions
+      const confirmedB: ConfirmedTypeB[] = displayedSuggestions
         .filter((s): s is Extract<Suggestion, { type: "B" }> => s.type === "B")
         .filter((s) => bState[s.id]?.confirmed && bState[s.id]?.wording.trim())
         .map((s) => {
@@ -243,11 +296,24 @@ function OptimizePage() {
         <Card className="p-5">
           <h2 className="text-base font-semibold">Job description</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Paste the JD you're targeting. Scoring and suggestions are rule-based — no AI is used to
-            invent content.
+            Core scoring is always deterministic and rule-based. AI-enhanced analysis is available
+            as an optional layer on top — it never adds skills to your resume on its own.
           </p>
+          <div className="mt-3 flex items-center justify-between rounded-md border bg-muted/40 p-3">
+            <div className="flex items-start gap-2">
+              <Brain className="mt-0.5 h-4 w-4 text-primary" />
+              <div>
+                <div className="text-sm font-medium">AI-enhanced analysis (optional)</div>
+                <div className="text-xs text-muted-foreground">
+                  Catches semantic matches the string-matcher misses and refines rewordings. Type B
+                  confirmation is still required for any new skill.
+                </div>
+              </div>
+            </div>
+            <Switch checked={aiEnabled} onCheckedChange={setAiEnabled} />
+          </div>
           <Textarea
-            className="mt-3 min-h-[380px]"
+            className="mt-3 min-h-[340px]"
             placeholder="Paste job description here…"
             value={jd}
             onChange={(e) => setJd(e.target.value)}
@@ -292,15 +358,32 @@ function OptimizePage() {
                 </div>
               </div>
               <div>
-                <div className="mb-2 text-sm font-medium">
-                  Missing skills ({result.missingSkills.length})
+                <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+                  <span>Missing skills ({result.missingSkills.filter((k) => !aiCoveredSet.has(k.toLowerCase())).length})</span>
+                  {aiEnabled && aiResult && aiResult.semanticMatches.length > 0 && (
+                    <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
+                      <Brain className="mr-1 h-3 w-3" /> AI found {aiResult.semanticMatches.length} additional match{aiResult.semanticMatches.length === 1 ? "" : "es"}
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  {result.missingSkills.slice(0, 40).map((k) => (
-                    <Badge key={k} variant="outline" className="border-destructive/60 text-destructive">
-                      {k}
-                    </Badge>
-                  ))}
+                  {result.missingSkills.slice(0, 40).map((k) => {
+                    const covered = aiCoveredSet.has(k.toLowerCase());
+                    return (
+                      <Badge
+                        key={k}
+                        variant="outline"
+                        className={
+                          covered
+                            ? "border-primary/40 text-primary line-through opacity-70"
+                            : "border-destructive/60 text-destructive"
+                        }
+                        title={covered ? "AI: your resume already covers this via different wording" : undefined}
+                      >
+                        {k}
+                      </Badge>
+                    );
+                  })}
                   {result.missingSkills.length === 0 && (
                     <span className="text-xs text-muted-foreground">Nothing obvious missing.</span>
                   )}
@@ -328,6 +411,58 @@ function OptimizePage() {
           )}
         </Card>
       </div>
+
+      {aiEnabled && (aiLoading || aiResult) && (
+        <Card className="border-primary/30 bg-primary/5 p-5">
+          <div className="flex items-center gap-2">
+            <Brain className="h-4 w-4 text-primary" />
+            <h2 className="text-base font-semibold">AI-enhanced analysis</h2>
+            {aiLoading && <Loader2 className="ml-1 h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+          </div>
+          {!aiLoading && aiResult && (
+            <div className="mt-3 grid gap-4 md:grid-cols-2">
+              <div>
+                <div className="mb-2 text-sm font-medium">Semantic matches ({aiResult.semanticMatches.length})</div>
+                {aiResult.semanticMatches.length === 0 ? (
+                  <div className="text-xs text-muted-foreground">No additional matches beyond keyword search.</div>
+                ) : (
+                  <ul className="space-y-2 text-sm">
+                    {aiResult.semanticMatches.slice(0, 8).map((m, i) => (
+                      <li key={i} className="rounded-md border bg-background/60 p-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="secondary" className="font-mono text-xs">{m.jdTerm}</Badge>
+                          <span className="text-xs text-muted-foreground">covered by</span>
+                          <span className="text-xs font-medium">"{m.evidence}"</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div>
+                <div className="mb-2 text-sm font-medium">AI rewording ideas ({aiResult.enhancedRewordings.length})</div>
+                {aiResult.enhancedRewordings.length === 0 ? (
+                  <div className="text-xs text-muted-foreground">No safe rewording opportunities found.</div>
+                ) : (
+                  <ul className="space-y-2 text-sm">
+                    {aiResult.enhancedRewordings.slice(0, 6).map((r, i) => (
+                      <li key={i} className="rounded-md border bg-background/60 p-2 text-xs">
+                        <div className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">{r.section}</div>
+                        <div className="text-muted-foreground line-through">{r.before}</div>
+                        <div className="mt-1 font-medium">{r.after}</div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="mt-2 text-[11px] text-muted-foreground">
+                  Ideas only — apply manually in the editor. AI never adds new facts.
+                </div>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
 
       {result && (
         <Card className="p-5">

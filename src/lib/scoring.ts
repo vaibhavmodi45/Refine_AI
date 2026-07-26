@@ -71,7 +71,8 @@ export function scoreResumeAgainstJob(resume: ResumeData, jd: string): ScoringRe
   let weighted = 0;
   let weightTotal = 0;
   for (const t of jdUnique) {
-    const isSkill = SKILL_HINTS.has(t) || /[+#.]/.test(t);
+    if (NON_SKILL_TOKENS.has(t)) continue;
+    const isSkill = SKILL_HINTS.has(t) || PUNCT_SKILL_TOKENS.has(t);
     const w = isSkill ? 3 : 1;
     weightTotal += w;
     if (rTokens.has(t)) {

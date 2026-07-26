@@ -296,11 +296,24 @@ function OptimizePage() {
         <Card className="p-5">
           <h2 className="text-base font-semibold">Job description</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Paste the JD you're targeting. Scoring and suggestions are rule-based — no AI is used to
-            invent content.
+            Core scoring is always deterministic and rule-based. AI-enhanced analysis is available
+            as an optional layer on top — it never adds skills to your resume on its own.
           </p>
+          <div className="mt-3 flex items-center justify-between rounded-md border bg-muted/40 p-3">
+            <div className="flex items-start gap-2">
+              <Brain className="mt-0.5 h-4 w-4 text-primary" />
+              <div>
+                <div className="text-sm font-medium">AI-enhanced analysis (optional)</div>
+                <div className="text-xs text-muted-foreground">
+                  Catches semantic matches the string-matcher misses and refines rewordings. Type B
+                  confirmation is still required for any new skill.
+                </div>
+              </div>
+            </div>
+            <Switch checked={aiEnabled} onCheckedChange={setAiEnabled} />
+          </div>
           <Textarea
-            className="mt-3 min-h-[380px]"
+            className="mt-3 min-h-[340px]"
             placeholder="Paste job description here…"
             value={jd}
             onChange={(e) => setJd(e.target.value)}

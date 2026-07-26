@@ -412,6 +412,58 @@ function OptimizePage() {
         </Card>
       </div>
 
+      {aiEnabled && (aiLoading || aiResult) && (
+        <Card className="border-primary/30 bg-primary/5 p-5">
+          <div className="flex items-center gap-2">
+            <Brain className="h-4 w-4 text-primary" />
+            <h2 className="text-base font-semibold">AI-enhanced analysis</h2>
+            {aiLoading && <Loader2 className="ml-1 h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+          </div>
+          {!aiLoading && aiResult && (
+            <div className="mt-3 grid gap-4 md:grid-cols-2">
+              <div>
+                <div className="mb-2 text-sm font-medium">Semantic matches ({aiResult.semanticMatches.length})</div>
+                {aiResult.semanticMatches.length === 0 ? (
+                  <div className="text-xs text-muted-foreground">No additional matches beyond keyword search.</div>
+                ) : (
+                  <ul className="space-y-2 text-sm">
+                    {aiResult.semanticMatches.slice(0, 8).map((m, i) => (
+                      <li key={i} className="rounded-md border bg-background/60 p-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="secondary" className="font-mono text-xs">{m.jdTerm}</Badge>
+                          <span className="text-xs text-muted-foreground">covered by</span>
+                          <span className="text-xs font-medium">"{m.resumeEvidence}"</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div>
+                <div className="mb-2 text-sm font-medium">AI rewording ideas ({aiResult.enhancedRewordings.length})</div>
+                {aiResult.enhancedRewordings.length === 0 ? (
+                  <div className="text-xs text-muted-foreground">No safe rewording opportunities found.</div>
+                ) : (
+                  <ul className="space-y-2 text-sm">
+                    {aiResult.enhancedRewordings.slice(0, 6).map((r, i) => (
+                      <li key={i} className="rounded-md border bg-background/60 p-2 text-xs">
+                        <div className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">{r.section}</div>
+                        <div className="text-muted-foreground line-through">{r.before}</div>
+                        <div className="mt-1 font-medium">{r.after}</div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="mt-2 text-[11px] text-muted-foreground">
+                  Ideas only — apply manually in the editor. AI never adds new facts.
+                </div>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
+
       {result && (
         <Card className="p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">

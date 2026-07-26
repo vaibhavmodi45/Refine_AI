@@ -358,15 +358,32 @@ function OptimizePage() {
                 </div>
               </div>
               <div>
-                <div className="mb-2 text-sm font-medium">
-                  Missing skills ({result.missingSkills.length})
+                <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+                  <span>Missing skills ({result.missingSkills.filter((k) => !aiCoveredSet.has(k.toLowerCase())).length})</span>
+                  {aiEnabled && aiResult && aiResult.semanticMatches.length > 0 && (
+                    <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
+                      <Brain className="mr-1 h-3 w-3" /> AI found {aiResult.semanticMatches.length} additional match{aiResult.semanticMatches.length === 1 ? "" : "es"}
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  {result.missingSkills.slice(0, 40).map((k) => (
-                    <Badge key={k} variant="outline" className="border-destructive/60 text-destructive">
-                      {k}
-                    </Badge>
-                  ))}
+                  {result.missingSkills.slice(0, 40).map((k) => {
+                    const covered = aiCoveredSet.has(k.toLowerCase());
+                    return (
+                      <Badge
+                        key={k}
+                        variant="outline"
+                        className={
+                          covered
+                            ? "border-primary/40 text-primary line-through opacity-70"
+                            : "border-destructive/60 text-destructive"
+                        }
+                        title={covered ? "AI: your resume already covers this via different wording" : undefined}
+                      >
+                        {k}
+                      </Badge>
+                    );
+                  })}
                   {result.missingSkills.length === 0 && (
                     <span className="text-xs text-muted-foreground">Nothing obvious missing.</span>
                   )}

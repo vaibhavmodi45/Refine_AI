@@ -112,9 +112,7 @@ function ExperienceSection({ data, template }: Props) {
       <SectionTitle template={template}>Experience</SectionTitle>
       {data.experience.map((e, i) => (
         <div key={i} style={{ marginBottom: 8 }}>
-          <div
-            style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}
-          >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <div>
               <span style={{ fontWeight: 700 }}>{e.role}</span>
               <span> — {e.company}</span>

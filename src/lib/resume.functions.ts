@@ -25,9 +25,7 @@ export const listResumes = createServerFn({ method: "GET" })
 
 export const getResume = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { resumeId: string }) =>
-    z.object({ resumeId: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: { resumeId: string }) => z.object({ resumeId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { data: resume, error } = await context.supabase
       .from("resumes")
@@ -167,9 +165,7 @@ export const setCurrentVersion = createServerFn({ method: "POST" })
 
 export const deleteResume = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { resumeId: string }) =>
-    z.object({ resumeId: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: { resumeId: string }) => z.object({ resumeId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("resumes").delete().eq("id", data.resumeId);
     if (error) throw new Error(error.message);

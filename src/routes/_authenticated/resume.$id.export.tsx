@@ -10,7 +10,9 @@ import { resumeDataSchema, type ResumeData, type TemplateId } from "@/lib/resume
 import { Download, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/resume/$id/export")({
-  head: () => ({ meta: [{ title: "Export resume — Refine" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Export resume — Refine" }, { name: "robots", content: "noindex" }],
+  }),
   component: ExportResume,
 });
 
@@ -37,11 +39,15 @@ function ExportResume() {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <Link to="/resume/$id/edit" params={{ id }}>
-          <Button size="sm" variant="ghost"><ArrowLeft className="mr-2 h-4 w-4" /> Back to editor</Button>
+          <Button size="sm" variant="ghost">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to editor
+          </Button>
         </Link>
         <h1 className="text-lg font-semibold">{q.data.resume.title}</h1>
         <div className="ml-auto">
-          <Button onClick={download}><Download className="mr-2 h-4 w-4" /> Download PDF</Button>
+          <Button onClick={download}>
+            <Download className="mr-2 h-4 w-4" /> Download PDF
+          </Button>
         </div>
       </div>
       <Card className="overflow-auto bg-muted/40 p-6">

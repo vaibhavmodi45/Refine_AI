@@ -20,7 +20,16 @@ const SKILL_HINTS = new Set(
   ),
 );
 const PUNCT_SKILL_TOKENS = new Set([
-  "c++", "c#", ".net", "node.js", "next.js", "vue.js", "d3.js", "three.js", "f#", "objective-c",
+  "c++",
+  "c#",
+  ".net",
+  "node.js",
+  "next.js",
+  "vue.js",
+  "d3.js",
+  "three.js",
+  "f#",
+  "objective-c",
 ]);
 
 function tokenize(text: string): string[] {
@@ -50,7 +59,12 @@ function resumeFullText(r: ResumeData): string {
     r.personalInfo.fullName,
     r.summary ?? "",
     ...r.experience.flatMap((e) => [e.role, e.company, ...(e.bullets ?? [])]),
-    ...r.projects.flatMap((p) => [p.name, p.description ?? "", ...(p.bullets ?? []), ...(p.techStack ?? [])]),
+    ...r.projects.flatMap((p) => [
+      p.name,
+      p.description ?? "",
+      ...(p.bullets ?? []),
+      ...(p.techStack ?? []),
+    ]),
     ...r.skills.flatMap((s) => [s.category, ...s.items]),
     ...(r.certifications ?? []).map((c) => c.name),
     ...(r.achievements ?? []),
@@ -91,11 +105,47 @@ function bestSkillCategory(r: ResumeData, keyword: string): string {
   if (!r.skills.length) return "Skills";
   // Find category whose items share most tokens with keyword
   const kw = keyword.toLowerCase();
-  const lang = ["javascript", "typescript", "python", "java", "go", "rust", "c++", "c#", "ruby", "php", "scala", "kotlin", "swift"];
-  const frame = ["react", "vue", "angular", "svelte", "next", "node", "express", "nestjs", "graphql", "django", "flask", "rails", "spring", "tanstack"];
-  if (lang.includes(kw)) return r.skills.find((s) => /lang/i.test(s.category))?.category ?? r.skills[0].category;
-  if (frame.includes(kw)) return r.skills.find((s) => /(framework|library|stack)/i.test(s.category))?.category ?? r.skills[0].category;
-  return r.skills.find((s) => /(tool|other|tech)/i.test(s.category))?.category ?? r.skills[0].category;
+  const lang = [
+    "javascript",
+    "typescript",
+    "python",
+    "java",
+    "go",
+    "rust",
+    "c++",
+    "c#",
+    "ruby",
+    "php",
+    "scala",
+    "kotlin",
+    "swift",
+  ];
+  const frame = [
+    "react",
+    "vue",
+    "angular",
+    "svelte",
+    "next",
+    "node",
+    "express",
+    "nestjs",
+    "graphql",
+    "django",
+    "flask",
+    "rails",
+    "spring",
+    "tanstack",
+  ];
+  if (lang.includes(kw))
+    return r.skills.find((s) => /lang/i.test(s.category))?.category ?? r.skills[0].category;
+  if (frame.includes(kw))
+    return (
+      r.skills.find((s) => /(framework|library|stack)/i.test(s.category))?.category ??
+      r.skills[0].category
+    );
+  return (
+    r.skills.find((s) => /(tool|other|tech)/i.test(s.category))?.category ?? r.skills[0].category
+  );
 }
 
 export function generateSuggestions(resume: ResumeData, jd: string): Suggestion[] {
@@ -110,9 +160,7 @@ export function generateSuggestions(resume: ResumeData, jd: string): Suggestion[
   const uid = () => `s${++seq}`;
 
   // Deduplicate keywords — only actual technical skills, never degrees or generic words.
-  const jdSkillKeywords = Array.from(
-    new Set(tokenize(jd).filter(isRealSkill)),
-  );
+  const jdSkillKeywords = Array.from(new Set(tokenize(jd).filter(isRealSkill)));
 
   for (const kw of jdSkillKeywords) {
     const preferred = preferredCase(jd, kw);
@@ -139,7 +187,9 @@ export function generateSuggestions(resume: ResumeData, jd: string): Suggestion[
 
   // Casing normalization for experience bullets & project bullets & summary.
   const brandKeywords = jdSkillKeywords.filter((k) => /[a-z]/.test(k) && SKILL_HINTS.has(k));
-  function findCasingIssues(text: string): { kw: string; preferred: string; replacement: string } | null {
+  function findCasingIssues(
+    text: string,
+  ): { kw: string; preferred: string; replacement: string } | null {
     for (const kw of brandKeywords) {
       const preferred = preferredCase(jd, kw);
       if (preferred === kw) continue; // JD lower-cased too
@@ -296,7 +346,10 @@ export function applySuggestions(
 
 // Safety check: no Type A suggestion may introduce content that isn't already in the resume.
 // For casing changes this is inherently true; for skills add, the keyword must exist in resume text.
-export function verifyTypeASafety(resume: ResumeData, suggestions: SuggestionA[]): { ok: boolean; violations: string[] } {
+export function verifyTypeASafety(
+  resume: ResumeData,
+  suggestions: SuggestionA[],
+): { ok: boolean; violations: string[] } {
   const text = resumeFullText(resume).toLowerCase();
   const violations: string[] = [];
   for (const s of suggestions) {

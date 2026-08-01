@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,15 +60,17 @@ function AuthPage() {
 
   async function handleGoogle() {
     setBusy(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + "/dashboard",
+      },
     });
-    if (result.error) {
+    if (error) {
       setBusy(false);
-      return toast.error(result.error.message || "Google sign-in failed");
+      return toast.error(error.message || "Google sign-in failed");
     }
-    if (result.redirected) return; // browser navigating away
-    navigate({ to: "/dashboard" });
+    // Browser navigates away to Google, then back via redirectTo.
   }
 
   return (
@@ -84,12 +85,7 @@ function AuthPage() {
             Build, score, and export ATS-friendly resumes.
           </p>
 
-          <Button
-            variant="outline"
-            className="mt-6 w-full"
-            onClick={handleGoogle}
-            disabled={busy}
-          >
+          <Button variant="outline" className="mt-6 w-full" onClick={handleGoogle} disabled={busy}>
             Continue with Google
           </Button>
           <div className="my-4 flex items-center gap-3 text-xs text-muted-foreground">
@@ -105,30 +101,64 @@ function AuthPage() {
               <form onSubmit={handleSignIn} className="mt-4 space-y-3">
                 <div>
                   <Label htmlFor="e1">Email</Label>
-                  <Input id="e1" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <Input
+                    id="e1"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                 </div>
                 <div>
                   <Label htmlFor="p1">Password</Label>
-                  <Input id="p1" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <Input
+                    id="p1"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
                 </div>
-                <Button type="submit" className="w-full" disabled={busy}>Sign in</Button>
+                <Button type="submit" className="w-full" disabled={busy}>
+                  Sign in
+                </Button>
               </form>
             </TabsContent>
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="mt-4 space-y-3">
                 <div>
                   <Label htmlFor="n2">Full name</Label>
-                  <Input id="n2" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                  <Input
+                    id="n2"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                  />
                 </div>
                 <div>
                   <Label htmlFor="e2">Email</Label>
-                  <Input id="e2" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <Input
+                    id="e2"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                 </div>
                 <div>
                   <Label htmlFor="p2">Password</Label>
-                  <Input id="p2" type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required />
+                  <Input
+                    id="p2"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    minLength={6}
+                    required
+                  />
                 </div>
-                <Button type="submit" className="w-full" disabled={busy}>Create account</Button>
+                <Button type="submit" className="w-full" disabled={busy}>
+                  Create account
+                </Button>
               </form>
             </TabsContent>
           </Tabs>

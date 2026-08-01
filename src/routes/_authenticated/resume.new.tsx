@@ -6,14 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { TEMPLATES, TEMPLATE_LABELS, emptyResume, sampleResume, type TemplateId } from "@/lib/resume-schema";
+import {
+  TEMPLATES,
+  TEMPLATE_LABELS,
+  emptyResume,
+  sampleResume,
+  type TemplateId,
+} from "@/lib/resume-schema";
 import { createResume } from "@/lib/resume.functions";
 import { TemplateRenderer } from "@/components/resume/TemplateRenderer";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/_authenticated/resume/new")({
-  head: () => ({ meta: [{ title: "New resume — Refine" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "New resume — Refine" }, { name: "robots", content: "noindex" }],
+  }),
   component: NewResume,
 });
 
@@ -39,7 +47,9 @@ function NewResume() {
     }
   }
 
-  const previewData = useSample ? sampleResume() : { ...emptyResume(), personalInfo: { ...emptyResume().personalInfo, fullName: "Your Name" } };
+  const previewData = useSample
+    ? sampleResume()
+    : { ...emptyResume(), personalInfo: { ...emptyResume().personalInfo, fullName: "Your Name" } };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[380px_1fr]">

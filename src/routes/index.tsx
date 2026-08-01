@@ -120,11 +120,15 @@ function Landing() {
       <header
         className={
           "sticky top-0 z-40 w-full border-b transition-colors " +
-          (scrolled ? "bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70" : "bg-background")
+          (scrolled
+            ? "bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70"
+            : "bg-background")
         }
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Link to="/" className="text-lg font-bold tracking-tight">Refine</Link>
+          <Link to="/" className="text-lg font-bold tracking-tight">
+            Refine
+          </Link>
           <nav className="hidden items-center gap-1 md:flex">
             {NAV_LINKS.map((l) => (
               <a
@@ -165,10 +169,14 @@ function Landing() {
                   ))}
                   <div className="mt-4 grid gap-2">
                     <Button asChild variant="outline">
-                      <Link to="/auth" onClick={() => setMobileOpen(false)}>Sign in</Link>
+                      <Link to="/auth" onClick={() => setMobileOpen(false)}>
+                        Sign in
+                      </Link>
                     </Button>
                     <Button asChild>
-                      <Link to="/auth" onClick={() => setMobileOpen(false)}>Get started</Link>
+                      <Link to="/auth" onClick={() => setMobileOpen(false)}>
+                        Get started
+                      </Link>
                     </Button>
                   </div>
                 </div>
@@ -188,8 +196,9 @@ function Landing() {
             The ATS-friendly resume builder that respects the facts.
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-balance text-lg text-muted-foreground">
-            Refine helps you build, upload, and tailor resumes to specific job descriptions. Rule-based
-            scoring you can trust — and suggestions that only ever use the facts already in your resume.
+            Refine helps you build, upload, and tailor resumes to specific job descriptions.
+            Rule-based scoring you can trust — and suggestions that only ever use the facts already
+            in your resume.
           </p>
           <div className="mt-8 flex justify-center gap-3">
             <Button asChild size="lg">
@@ -226,13 +235,14 @@ function Landing() {
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">How Refine works</h2>
             <p className="mt-3 text-muted-foreground">
-              Five steps from a blank page (or an existing PDF) to a job-specific, ATS-scored resume.
+              Five steps from a blank page (or an existing PDF) to a job-specific, ATS-scored
+              resume.
             </p>
           </div>
           <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-5">
             <Step n={1} title="Build or upload">
-              Start from a Classic, Modern, or Fresher template — or upload your existing PDF/DOCX and
-              Refine parses it into editable sections.
+              Start from a Classic, Modern, or Fresher template — or upload your existing PDF/DOCX
+              and Refine parses it into editable sections.
             </Step>
             <Step n={2} title="Paste the JD">
               Drop the full job description into the Optimize screen for the resume version you're
@@ -243,12 +253,12 @@ function Landing() {
               skills the JD wants that you don't have.
             </Step>
             <Step n={4} title="Confirm & apply">
-              Toggle each suggestion, confirm any missing skills you actually do have, then apply the
-              batch as a new version or overwrite the current one.
+              Toggle each suggestion, confirm any missing skills you actually do have, then apply
+              the batch as a new version or overwrite the current one.
             </Step>
             <Step n={5} title="Score & export">
-              Compare before/after ATS and match scores, then export a PDF that pixel-matches the live
-              preview.
+              Compare before/after ATS and match scores, then export a PDF that pixel-matches the
+              live preview.
             </Step>
           </div>
         </div>
@@ -273,7 +283,8 @@ function Landing() {
           </Persona>
           <Persona icon={Repeat} title="Career switchers">
             Reframe existing bullets around the vocabulary of the new field. Refine flags gaps
-            honestly so you can decide what to learn next rather than paper over what you don't know.
+            honestly so you can decide what to learn next rather than paper over what you don't
+            know.
           </Persona>
         </div>
       </section>
@@ -286,7 +297,8 @@ function Landing() {
               Refine vs. a typical resume builder
             </h2>
             <p className="mt-3 text-muted-foreground">
-              Most builders stop at pretty templates. Refine is built around the job you're applying to.
+              Most builders stop at pretty templates. Refine is built around the job you're applying
+              to.
             </p>
           </div>
           <div className="mt-10 overflow-x-auto rounded-xl border bg-card shadow-sm">
@@ -312,10 +324,18 @@ function Landing() {
                   <tr key={label as string}>
                     <td className="p-4">{label}</td>
                     <td className="p-4">
-                      {gen ? <Check className="h-4 w-4 text-primary" /> : <X className="h-4 w-4 text-muted-foreground" />}
+                      {gen ? (
+                        <Check className="h-4 w-4 text-primary" />
+                      ) : (
+                        <X className="h-4 w-4 text-muted-foreground" />
+                      )}
                     </td>
                     <td className="p-4">
-                      {refine ? <Check className="h-4 w-4 text-primary" /> : <X className="h-4 w-4 text-muted-foreground" />}
+                      {refine ? (
+                        <Check className="h-4 w-4 text-primary" />
+                      ) : (
+                        <X className="h-4 w-4 text-muted-foreground" />
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -329,10 +349,26 @@ function Landing() {
       <section className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { icon: ShieldCheck, title: "RLS-protected data", body: "Your resumes live in a database where row-level security means only you can read your own rows." },
-            { icon: ListChecks, title: "Multiple versions", body: "Keep an original master and as many tailored versions as you need — mark one as current at a time." },
-            { icon: FileDown, title: "Preview = PDF", body: "The exported PDF is generated from the same DOM as the on-screen preview, so what you see is what you send." },
-            { icon: Sparkles, title: "Opt-in AI", body: "Core scoring and suggestions don't require any AI call. AI-assisted wording is optional and always grounded." },
+            {
+              icon: ShieldCheck,
+              title: "RLS-protected data",
+              body: "Your resumes live in a database where row-level security means only you can read your own rows.",
+            },
+            {
+              icon: ListChecks,
+              title: "Multiple versions",
+              body: "Keep an original master and as many tailored versions as you need — mark one as current at a time.",
+            },
+            {
+              icon: FileDown,
+              title: "Preview = PDF",
+              body: "The exported PDF is generated from the same DOM as the on-screen preview, so what you see is what you send.",
+            },
+            {
+              icon: Sparkles,
+              title: "Opt-in AI",
+              body: "Core scoring and suggestions don't require any AI call. AI-assisted wording is optional and always grounded.",
+            },
           ].map(({ icon: Icon, title, body }) => (
             <div key={title} className="flex gap-3">
               <div className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
@@ -351,7 +387,9 @@ function Landing() {
       <section id="faq" className="border-t bg-muted/30 py-20">
         <div className="mx-auto max-w-3xl px-6">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Frequently asked questions</h2>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Frequently asked questions
+            </h2>
             <p className="mt-3 text-muted-foreground">
               Straight answers about how Refine actually behaves.
             </p>
@@ -360,42 +398,47 @@ function Landing() {
             <AccordionItem value="q1">
               <AccordionTrigger>Will the AI make up things I haven't done?</AccordionTrigger>
               <AccordionContent>
-                No. Core scoring and rewording suggestions are pure rule-based TypeScript — they only
-                use words already in your resume (e.g. matching a JD's exact casing, or promoting a
-                skill you already mention in a bullet into your Skills section). AI-enhanced analysis
-                is an optional toggle on the Optimize screen: when enabled, it flags semantic matches
-                (e.g. "built REST APIs" satisfying "API design") and proposes tighter phrasing, but
-                every AI output is grounded against your resume text and never adds new skills.
-                Missing skills always require an explicit Type B confirmation with your own wording.
+                No. Core scoring and rewording suggestions are pure rule-based TypeScript — they
+                only use words already in your resume (e.g. matching a JD's exact casing, or
+                promoting a skill you already mention in a bullet into your Skills section).
+                AI-enhanced analysis is an optional toggle on the Optimize screen: when enabled, it
+                flags semantic matches (e.g. "built REST APIs" satisfying "API design") and proposes
+                tighter phrasing, but every AI output is grounded against your resume text and never
+                adds new skills. Missing skills always require an explicit Type B confirmation with
+                your own wording.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="q2">
               <AccordionTrigger>What file formats can I upload?</AccordionTrigger>
               <AccordionContent>
-                PDF and DOCX. Refine extracts the text client-side, runs a heuristic segmenter to map
-                it into structured sections (Personal info, Experience, Education, Projects, Skills,
-                etc.), and drops you into a review screen so you can fix any parsing mistakes before
-                saving.
+                PDF and DOCX. Refine extracts the text client-side, runs a heuristic segmenter to
+                map it into structured sections (Personal info, Experience, Education, Projects,
+                Skills, etc.), and drops you into a review screen so you can fix any parsing
+                mistakes before saving.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="q3">
               <AccordionTrigger>Is my resume data private?</AccordionTrigger>
               <AccordionContent>
-                Yes. Every resume, version, and job description is stored behind row-level security —
-                the database policies mean only the authenticated owner of a row can read or modify
-                it. Refine's server code accesses your data using your own session, not an admin key.
+                Yes. Every resume, version, and job description is stored behind row-level security
+                — the database policies mean only the authenticated owner of a row can read or
+                modify it. Refine's server code accesses your data using your own session, not an
+                admin key.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="q4">
               <AccordionTrigger>Do I need to use the AI features?</AccordionTrigger>
               <AccordionContent>
                 No. ATS scoring, keyword reporting, and the entire suggestions engine are pure
-                rule-based TypeScript. You can build, tailor, and export a full resume without any AI
-                call ever happening. AI-assisted wording is a separate opt-in step layered on top.
+                rule-based TypeScript. You can build, tailor, and export a full resume without any
+                AI call ever happening. AI-assisted wording is a separate opt-in step layered on
+                top.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="q5">
-              <AccordionTrigger>Can I keep multiple tailored versions of the same resume?</AccordionTrigger>
+              <AccordionTrigger>
+                Can I keep multiple tailored versions of the same resume?
+              </AccordionTrigger>
               <AccordionContent>
                 Yes. Each resume can have any number of named versions. You can mark one as the
                 current version, apply suggestions as a new version to keep the original untouched,
@@ -406,8 +449,8 @@ function Landing() {
               <AccordionTrigger>Does the exported PDF really match the preview?</AccordionTrigger>
               <AccordionContent>
                 Yes. The exporter renders the exact same template DOM node used for the on-screen
-                preview and captures it into a PDF. There is no separate server-side render, so styles,
-                spacing, and page breaks stay identical.
+                preview and captures it into a PDF. There is no separate server-side render, so
+                styles, spacing, and page breaks stay identical.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -446,31 +489,59 @@ function Landing() {
             <div>
               <div className="text-sm font-semibold">Product</div>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                <li><a href="#features" className="hover:text-foreground">Features</a></li>
-                <li><a href="#how" className="hover:text-foreground">How it works</a></li>
-                <li><a href="#compare" className="hover:text-foreground">Compare</a></li>
-                <li><a href="#faq" className="hover:text-foreground">FAQ</a></li>
+                <li>
+                  <a href="#features" className="hover:text-foreground">
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a href="#how" className="hover:text-foreground">
+                    How it works
+                  </a>
+                </li>
+                <li>
+                  <a href="#compare" className="hover:text-foreground">
+                    Compare
+                  </a>
+                </li>
+                <li>
+                  <a href="#faq" className="hover:text-foreground">
+                    FAQ
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
               <div className="text-sm font-semibold">Account</div>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/auth" className="hover:text-foreground">Sign in</Link></li>
-                <li><Link to="/auth" className="hover:text-foreground">Create account</Link></li>
+                <li>
+                  <Link to="/auth" className="hover:text-foreground">
+                    Sign in
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/auth" className="hover:text-foreground">
+                    Create account
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
               <div className="text-sm font-semibold">Legal</div>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                <li><span>Privacy — your data is RLS-protected</span></li>
-                <li><span>Terms — use at your own discretion</span></li>
+                <li>
+                  <span>Privacy — your data is RLS-protected</span>
+                </li>
+                <li>
+                  <span>Terms — use at your own discretion</span>
+                </li>
               </ul>
             </div>
           </div>
           <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-              © {new Date().getFullYear()} Refine
+              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />© {new Date().getFullYear()}{" "}
+              Refine
             </div>
             <div>Designed and Developed by Vaibhav Modi</div>
           </div>

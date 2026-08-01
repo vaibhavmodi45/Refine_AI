@@ -24,7 +24,9 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/resume/$id/upload")({
-  head: () => ({ meta: [{ title: "Upload resume — Refine" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Upload resume — Refine" }, { name: "robots", content: "noindex" }],
+  }),
   component: UploadPage,
 });
 
@@ -119,12 +121,16 @@ function UploadPage() {
       {!parsed && (
         <Card className="p-8 text-center">
           <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-accent">
-            {parsing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Upload className="h-5 w-5" />}
+            {parsing ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Upload className="h-5 w-5" />
+            )}
           </div>
           <h2 className="text-lg font-semibold">Upload PDF or DOCX</h2>
           <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-            We'll extract the text and structure it into editable sections. You'll review
-            everything before it saves as a version.
+            We'll extract the text and structure it into editable sections. You'll review everything
+            before it saves as a version.
           </p>
           <div className="mx-auto mt-5 max-w-xs">
             <Input
@@ -157,7 +163,12 @@ function UploadPage() {
               <Button variant="ghost" size="sm" onClick={() => setParsed(null)}>
                 Upload a different file
               </Button>
-              <Button variant="outline" size="sm" disabled={saving} onClick={() => setConfirm(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={saving}
+                onClick={() => setConfirm(true)}
+              >
                 Replace current version
               </Button>
               <Button size="sm" disabled={saving} onClick={() => commit("new")}>
@@ -190,8 +201,8 @@ function UploadPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Replace current version?</AlertDialogTitle>
             <AlertDialogDescription>
-              This overwrites the contents of the currently active version with the parsed data.
-              To keep the original safe, use “Save as new version” instead.
+              This overwrites the contents of the currently active version with the parsed data. To
+              keep the original safe, use “Save as new version” instead.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

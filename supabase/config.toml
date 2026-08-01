@@ -1,1 +1,3 @@
-project_id = "xjlrgdgnixmffirvvmpn"
+# Set project_id to your Supabase project ref when using the Supabase CLI
+# (`supabase link`, `supabase db push`, etc.). Replace the placeholder below.
+project_id = "YOUR_PROJECT_REF"

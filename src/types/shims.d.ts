@@ -1,5 +1,7 @@
 declare module "mammoth/mammoth.browser.js" {
-  export function extractRawText(o: { arrayBuffer: ArrayBuffer }): Promise<{ value: string; messages: unknown[] }>;
+  export function extractRawText(o: {
+    arrayBuffer: ArrayBuffer;
+  }): Promise<{ value: string; messages: unknown[] }>;
 }
 declare module "pdfjs-dist/build/pdf.worker.min.mjs?url" {
   const src: string;

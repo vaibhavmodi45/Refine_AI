@@ -3,7 +3,9 @@ import { emptyResume, type ResumeData } from "./resume-schema";
 /** Extract raw text from a PDF file using pdfjs-dist. */
 export async function extractPdfText(file: File): Promise<string> {
   const pdfjs = await import("pdfjs-dist");
-  const workerMod = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")) as { default: string };
+  const workerMod = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")) as {
+    default: string;
+  };
   pdfjs.GlobalWorkerOptions.workerSrc = workerMod.default;
   const buf = await file.arrayBuffer();
   const doc = await pdfjs.getDocument({ data: buf }).promise;
@@ -28,20 +30,33 @@ export async function extractPdfText(file: File): Promise<string> {
 }
 
 export async function extractDocxText(file: File): Promise<string> {
-  const mammoth = (await import(
-    /* @vite-ignore */ "mammoth/mammoth.browser.js"
-  )) as { extractRawText: (o: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }> };
+  const mammoth = (await import(/* @vite-ignore */ "mammoth/mammoth.browser.js")) as {
+    extractRawText: (o: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }>;
+  };
   const arrayBuffer = await file.arrayBuffer();
   const result = await mammoth.extractRawText({ arrayBuffer });
   return result.value ?? "";
 }
 
 const SECTION_MAP: Array<{ key: SectionKey; patterns: RegExp[] }> = [
-  { key: "summary", patterns: [/^(professional\s+)?summary$/i, /^objective$/i, /^profile$/i, /^about( me)?$/i] },
-  { key: "experience", patterns: [/^(work\s+|professional\s+)?experience$/i, /^employment( history)?$/i, /^work history$/i] },
+  {
+    key: "summary",
+    patterns: [/^(professional\s+)?summary$/i, /^objective$/i, /^profile$/i, /^about( me)?$/i],
+  },
+  {
+    key: "experience",
+    patterns: [
+      /^(work\s+|professional\s+)?experience$/i,
+      /^employment( history)?$/i,
+      /^work history$/i,
+    ],
+  },
   { key: "education", patterns: [/^education$/i, /^academic( background)?$/i] },
   { key: "projects", patterns: [/^projects?$/i, /^selected projects$/i, /^personal projects$/i] },
-  { key: "skills", patterns: [/^(technical\s+)?skills$/i, /^core competencies$/i, /^technologies$/i] },
+  {
+    key: "skills",
+    patterns: [/^(technical\s+)?skills$/i, /^core competencies$/i, /^technologies$/i],
+  },
   { key: "certifications", patterns: [/^certifications?$/i, /^licenses?$/i] },
   { key: "achievements", patterns: [/^achievements?$/i, /^awards?$/i, /^honou?rs?$/i] },
   { key: "languages", patterns: [/^languages?$/i] },
@@ -86,8 +101,15 @@ function parseDateRange(line: string): { start?: string; end?: string; rest: str
     end = matches[1] ?? (presentMatch ? "Present" : undefined);
     // strip date substring and dashes
     for (const m of matches) rest = rest.replace(m, "");
-    rest = rest.replace(/\bpresent\b|\bcurrent\b/i, "").replace(/[–—-]\s*$/g, "").replace(/\s{2,}/g, " ").trim();
-    rest = rest.replace(/[|·•]/g, " ").replace(/\s{2,}/g, " ").trim();
+    rest = rest
+      .replace(/\bpresent\b|\bcurrent\b/i, "")
+      .replace(/[–—-]\s*$/g, "")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+    rest = rest
+      .replace(/[|·•]/g, " ")
+      .replace(/\s{2,}/g, " ")
+      .trim();
   }
   return { start, end, rest };
 }
@@ -106,7 +128,12 @@ export function segmentToResume(text: string): ResumeData {
   const rawLines = text
     .replace(/\r/g, "")
     .split("\n")
-    .map((l) => l.replace(/\u00A0/g, " ").replace(/[\t ]+/g, " ").trimEnd());
+    .map((l) =>
+      l
+        .replace(/\u00A0/g, " ")
+        .replace(/[\t ]+/g, " ")
+        .trimEnd(),
+    );
 
   // ---- Header extraction (before first section) ----
   const emailRe = /[\w.+-]+@[\w-]+\.[\w.-]+/;
@@ -215,7 +242,10 @@ export function segmentToResume(text: string): ResumeData {
   resume.certifications = sections.certifications
     .filter((l) => l.trim())
     .map((l) => {
-      const parts = l.split(/[|·•\-–—]/).map((p) => p.trim()).filter(Boolean);
+      const parts = l
+        .split(/[|·•\-–—]/)
+        .map((p) => p.trim())
+        .filter(Boolean);
       return { name: parts[0] ?? l.trim(), issuer: parts[1], date: parts[2] };
     });
 
@@ -271,7 +301,10 @@ function parseExperienceLike(lines: string[]): ExpBlock[] {
     if (looksLikeHeader) {
       if (cur) blocks.push(cur);
       const { start, end, rest } = parseDateRange(line);
-      const parts = rest.split(/\s[-–—@|]\s|\s+at\s+/i).map((p) => p.trim()).filter(Boolean);
+      const parts = rest
+        .split(/\s[-–—@|]\s|\s+at\s+/i)
+        .map((p) => p.trim())
+        .filter(Boolean);
       const role = parts[0] ?? "";
       const company = parts[1] ?? "";
       const location = parts[2];
@@ -308,7 +341,10 @@ function parseEducation(lines: string[]): ResumeData["education"] {
     const { start, end, rest } = parseDateRange(joined);
     const gpaMatch = rest.match(/\bgpa[:\s]*([\d.]+)/i);
     const cleaned = rest.replace(/\bgpa[:\s]*[\d.]+/i, "").trim();
-    const parts = cleaned.split(/\s*\|\s*|,\s+/).map((p) => p.trim()).filter(Boolean);
+    const parts = cleaned
+      .split(/\s*\|\s*|,\s+/)
+      .map((p) => p.trim())
+      .filter(Boolean);
     out.push({
       institution: parts[0] ?? cleaned,
       degree: parts[1] ?? "",
@@ -331,10 +367,18 @@ function parseSkills(lines: string[]): ResumeData["skills"] {
     if (m) {
       out.push({
         category: m[1].trim(),
-        items: m[2].split(/[,;•·|]/).map((s) => s.trim()).filter(Boolean),
+        items: m[2]
+          .split(/[,;•·|]/)
+          .map((s) => s.trim())
+          .filter(Boolean),
       });
     } else {
-      flatItems.push(...line.split(/[,;•·|]/).map((s) => s.trim()).filter(Boolean));
+      flatItems.push(
+        ...line
+          .split(/[,;•·|]/)
+          .map((s) => s.trim())
+          .filter(Boolean),
+      );
     }
   }
   if (flatItems.length && !out.length) {

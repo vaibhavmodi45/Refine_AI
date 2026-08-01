@@ -103,7 +103,9 @@
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
+  * {
+    border-color: var(--color-border);
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -126,21 +128,45 @@
   overflow-wrap: break-word;
   word-break: break-word;
 }
-.resume-page * { min-width: 0; max-width: 100%; overflow-wrap: break-word; word-break: break-word; }
-.resume-page.template-classic { font-family: var(--font-serif); }
-.resume-page.template-modern  { font-family: var(--font-sans); }
-.resume-page.template-fresher { font-family: var(--font-sans); }
+.resume-page * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.resume-page.template-classic {
+  font-family: var(--font-serif);
+}
+.resume-page.template-modern {
+  font-family: var(--font-sans);
+}
+.resume-page.template-fresher {
+  font-family: var(--font-sans);
+}
 
-.resume-page h1, .resume-page h2, .resume-page h3 { color: #0b0b0b; }
-.resume-page a { color: #1a3a8f; text-decoration: none; }
-.resume-page ul { list-style: disc; padding-left: 1.05em; margin: 0.15em 0 0.4em; }
-.resume-page li { margin: 0.1em 0; }
+.resume-page h1,
+.resume-page h2,
+.resume-page h3 {
+  color: #0b0b0b;
+}
+.resume-page a {
+  color: #1a3a8f;
+  text-decoration: none;
+}
+.resume-page ul {
+  list-style: disc;
+  padding-left: 1.05em;
+  margin: 0.15em 0 0.4em;
+}
+.resume-page li {
+  margin: 0.1em 0;
+}
 
 /* Auto-scale the fixed 8.5in preview to fit any container width. */
 .resume-preview-scale {
   width: 8.5in;
   transform-origin: top center;
-  box-shadow: 0 10px 30px -12px rgba(0,0,0,0.25);
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.25);
 }
 .resume-preview-frame {
   container-type: inline-size;
@@ -156,4 +182,3 @@
     height: calc(11in * (100cqw / 816));
   }
 }
-

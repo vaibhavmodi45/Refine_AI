@@ -22,7 +22,16 @@ const SKILL_HINTS = new Set(
 );
 // Multi-punct programming tokens that are legitimate skills.
 const PUNCT_SKILL_TOKENS = new Set([
-  "c++", "c#", ".net", "node.js", "next.js", "vue.js", "d3.js", "three.js", "f#", "objective-c",
+  "c++",
+  "c#",
+  ".net",
+  "node.js",
+  "next.js",
+  "vue.js",
+  "d3.js",
+  "three.js",
+  "f#",
+  "objective-c",
 ]);
 
 function tokenize(text: string): string[] {
@@ -36,7 +45,12 @@ function resumeText(r: ResumeData): string {
     r.personalInfo.fullName,
     r.summary ?? "",
     ...r.experience.flatMap((e) => [e.role, e.company, ...(e.bullets ?? [])]),
-    ...r.projects.flatMap((p) => [p.name, p.description ?? "", ...(p.bullets ?? []), ...(p.techStack ?? [])]),
+    ...r.projects.flatMap((p) => [
+      p.name,
+      p.description ?? "",
+      ...(p.bullets ?? []),
+      ...(p.techStack ?? []),
+    ]),
     ...r.skills.flatMap((s) => [s.category, ...s.items]),
     ...(r.certifications ?? []).map((c) => c.name),
     ...(r.achievements ?? []),
@@ -48,7 +62,9 @@ function resumeText(r: ResumeData): string {
 function extractSkillTokens(r: ResumeData): Set<string> {
   const set = new Set<string>();
   r.skills.forEach((g) => g.items.forEach((i) => tokenize(i).forEach((t) => set.add(t))));
-  r.projects.forEach((p) => (p.techStack ?? []).forEach((i) => tokenize(i).forEach((t) => set.add(t))));
+  r.projects.forEach((p) =>
+    (p.techStack ?? []).forEach((i) => tokenize(i).forEach((t) => set.add(t))),
+  );
   return set;
 }
 

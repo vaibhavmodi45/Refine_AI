@@ -43,7 +43,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Sparkles, Target, TrendingUp, AlertCircle, CheckCircle2, Wand2, Loader2, Brain } from "lucide-react";
+import {
+  ArrowLeft,
+  Sparkles,
+  Target,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle2,
+  Wand2,
+  Loader2,
+  Brain,
+} from "lucide-react";
 import { resumeDataSchema, type ResumeData, type TemplateId } from "@/lib/resume-schema";
 import { scoreResumeAgainstJob, type ScoringResult } from "@/lib/scoring";
 import {
@@ -58,7 +68,9 @@ import {
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/resume/$id/optimize")({
-  head: () => ({ meta: [{ title: "Optimize resume — Refine" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Optimize resume — Refine" }, { name: "robots", content: "noindex" }],
+  }),
   component: OptimizePage,
 });
 
@@ -152,7 +164,9 @@ function OptimizePage() {
     return g;
   }, [displayedSuggestions]);
 
-  const selectedACount = displayedSuggestions.filter((s) => s.type === "A" && includeA[s.id]).length;
+  const selectedACount = displayedSuggestions.filter(
+    (s) => s.type === "A" && includeA[s.id],
+  ).length;
   const confirmedBCount = displayedSuggestions.filter(
     (s) => s.type === "B" && bState[s.id]?.confirmed && bState[s.id]?.wording.trim(),
   ).length;
@@ -174,7 +188,9 @@ function OptimizePage() {
       } catch (e) {
         if (!cancelled) {
           setAiResult(null);
-          toast.error("AI-enhanced analysis is unavailable right now — showing deterministic results.");
+          toast.error(
+            "AI-enhanced analysis is unavailable right now — showing deterministic results.",
+          );
           console.error("AI enhance failed:", e);
         }
       } finally {
@@ -187,7 +203,6 @@ function OptimizePage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aiEnabled, jd, current?.id]);
-
 
   async function doSave(mode: "overwrite" | "new") {
     if (!data || !current) return;
@@ -236,9 +251,7 @@ function OptimizePage() {
       // Reset selections so re-runs start fresh
       setIncludeA({});
       setBState({});
-      toast.success(
-        mode === "new" ? "Saved as a new version" : "Overwrote current version",
-      );
+      toast.success(mode === "new" ? "Saved as a new version" : "Overwrote current version");
       router.invalidate();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Save failed");
@@ -248,7 +261,8 @@ function OptimizePage() {
   }
 
   if (q.isLoading) return <div className="text-sm text-muted-foreground">Loading…</div>;
-  if (!data) return <div className="text-sm text-muted-foreground">No resume version available.</div>;
+  if (!data)
+    return <div className="text-sm text-muted-foreground">No resume version available.</div>;
 
   return (
     <div className="space-y-4">
@@ -275,17 +289,33 @@ function OptimizePage() {
               <div className="text-sm font-semibold">Suggestions applied — new scores</div>
               <div className="mt-1 flex flex-wrap gap-4 text-sm text-muted-foreground">
                 <span>
-                  ATS: <b className="text-foreground">{beforeScore.atsScore} → {postSaveScore.atsScore}</b>
+                  ATS:{" "}
+                  <b className="text-foreground">
+                    {beforeScore.atsScore} → {postSaveScore.atsScore}
+                  </b>
                 </span>
                 <span>
-                  Match: <b className="text-foreground">{beforeScore.matchScore} → {postSaveScore.matchScore}</b>
+                  Match:{" "}
+                  <b className="text-foreground">
+                    {beforeScore.matchScore} → {postSaveScore.matchScore}
+                  </b>
                 </span>
                 <span>
-                  Missing skills: <b className="text-foreground">{beforeScore.missingSkills.length} → {postSaveScore.missingSkills.length}</b>
+                  Missing skills:{" "}
+                  <b className="text-foreground">
+                    {beforeScore.missingSkills.length} → {postSaveScore.missingSkills.length}
+                  </b>
                 </span>
               </div>
             </div>
-            <Button size="sm" variant="ghost" onClick={() => { setPostSaveScore(null); setBeforeScore(null); }}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setPostSaveScore(null);
+                setBeforeScore(null);
+              }}
+            >
               Dismiss
             </Button>
           </div>
@@ -347,10 +377,14 @@ function OptimizePage() {
                 <Progress value={result.matchScore} />
               </div>
               <div>
-                <div className="mb-2 text-sm font-medium">Keywords found ({result.keywordsFound.length})</div>
+                <div className="mb-2 text-sm font-medium">
+                  Keywords found ({result.keywordsFound.length})
+                </div>
                 <div className="flex flex-wrap gap-1">
                   {result.keywordsFound.slice(0, 40).map((k) => (
-                    <Badge key={k} variant="secondary">{k}</Badge>
+                    <Badge key={k} variant="secondary">
+                      {k}
+                    </Badge>
                   ))}
                   {result.keywordsFound.length === 0 && (
                     <span className="text-xs text-muted-foreground">None yet.</span>
@@ -359,10 +393,14 @@ function OptimizePage() {
               </div>
               <div>
                 <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-                  <span>Missing skills ({result.missingSkills.filter((k) => !aiCoveredSet.has(k.toLowerCase())).length})</span>
+                  <span>
+                    Missing skills (
+                    {result.missingSkills.filter((k) => !aiCoveredSet.has(k.toLowerCase())).length})
+                  </span>
                   {aiEnabled && aiResult && aiResult.semanticMatches.length > 0 && (
                     <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
-                      <Brain className="mr-1 h-3 w-3" /> AI found {aiResult.semanticMatches.length} additional match{aiResult.semanticMatches.length === 1 ? "" : "es"}
+                      <Brain className="mr-1 h-3 w-3" /> AI found {aiResult.semanticMatches.length}{" "}
+                      additional match{aiResult.semanticMatches.length === 1 ? "" : "es"}
                     </Badge>
                   )}
                 </div>
@@ -378,7 +416,11 @@ function OptimizePage() {
                             ? "border-primary/40 text-primary line-through opacity-70"
                             : "border-destructive/60 text-destructive"
                         }
-                        title={covered ? "AI: your resume already covers this via different wording" : undefined}
+                        title={
+                          covered
+                            ? "AI: your resume already covers this via different wording"
+                            : undefined
+                        }
                       >
                         {k}
                       </Badge>
@@ -417,20 +459,28 @@ function OptimizePage() {
           <div className="flex items-center gap-2">
             <Brain className="h-4 w-4 text-primary" />
             <h2 className="text-base font-semibold">AI-enhanced analysis</h2>
-            {aiLoading && <Loader2 className="ml-1 h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+            {aiLoading && (
+              <Loader2 className="ml-1 h-3.5 w-3.5 animate-spin text-muted-foreground" />
+            )}
           </div>
           {!aiLoading && aiResult && (
             <div className="mt-3 grid gap-4 md:grid-cols-2">
               <div>
-                <div className="mb-2 text-sm font-medium">Semantic matches ({aiResult.semanticMatches.length})</div>
+                <div className="mb-2 text-sm font-medium">
+                  Semantic matches ({aiResult.semanticMatches.length})
+                </div>
                 {aiResult.semanticMatches.length === 0 ? (
-                  <div className="text-xs text-muted-foreground">No additional matches beyond keyword search.</div>
+                  <div className="text-xs text-muted-foreground">
+                    No additional matches beyond keyword search.
+                  </div>
                 ) : (
                   <ul className="space-y-2 text-sm">
                     {aiResult.semanticMatches.slice(0, 8).map((m, i) => (
                       <li key={i} className="rounded-md border bg-background/60 p-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <Badge variant="secondary" className="font-mono text-xs">{m.jdTerm}</Badge>
+                          <Badge variant="secondary" className="font-mono text-xs">
+                            {m.jdTerm}
+                          </Badge>
                           <span className="text-xs text-muted-foreground">covered by</span>
                           <span className="text-xs font-medium">"{m.evidence}"</span>
                         </div>
@@ -440,14 +490,20 @@ function OptimizePage() {
                 )}
               </div>
               <div>
-                <div className="mb-2 text-sm font-medium">AI rewording ideas ({aiResult.enhancedRewordings.length})</div>
+                <div className="mb-2 text-sm font-medium">
+                  AI rewording ideas ({aiResult.enhancedRewordings.length})
+                </div>
                 {aiResult.enhancedRewordings.length === 0 ? (
-                  <div className="text-xs text-muted-foreground">No safe rewording opportunities found.</div>
+                  <div className="text-xs text-muted-foreground">
+                    No safe rewording opportunities found.
+                  </div>
                 ) : (
                   <ul className="space-y-2 text-sm">
                     {aiResult.enhancedRewordings.slice(0, 6).map((r, i) => (
                       <li key={i} className="rounded-md border bg-background/60 p-2 text-xs">
-                        <div className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">{r.section}</div>
+                        <div className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                          {r.section}
+                        </div>
                         <div className="text-muted-foreground line-through">{r.before}</div>
                         <div className="mt-1 font-medium">{r.after}</div>
                       </li>
@@ -463,7 +519,6 @@ function OptimizePage() {
         </Card>
       )}
 
-
       {result && (
         <Card className="p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -473,10 +528,12 @@ function OptimizePage() {
             </div>
             <div className="text-xs text-muted-foreground">
               <span className="mr-3">
-                <span className="mr-1 inline-block h-2 w-2 rounded-full bg-primary" /> Type A: safe rewording
+                <span className="mr-1 inline-block h-2 w-2 rounded-full bg-primary" /> Type A: safe
+                rewording
               </span>
               <span>
-                <span className="mr-1 inline-block h-2 w-2 rounded-full bg-destructive" /> Type B: needs your confirmation
+                <span className="mr-1 inline-block h-2 w-2 rounded-full bg-destructive" /> Type B:
+                needs your confirmation
               </span>
             </div>
           </div>
@@ -487,14 +544,21 @@ function OptimizePage() {
               Your resume already covers this JD well — no suggestions.
             </div>
           ) : (
-            <Accordion type="multiple" defaultValue={["Skills", "Experience", "Projects", "Summary"]} className="mt-4">
+            <Accordion
+              type="multiple"
+              defaultValue={["Skills", "Experience", "Projects", "Summary"]}
+              className="mt-4"
+            >
               {(["Summary", "Experience", "Projects", "Skills"] as SectionGroup[]).map((sec) => {
                 const items = grouped[sec];
                 if (!items.length) return null;
                 return (
                   <AccordionItem key={sec} value={sec}>
                     <AccordionTrigger>
-                      {sec} <Badge variant="secondary" className="ml-2">{items.length}</Badge>
+                      {sec}{" "}
+                      <Badge variant="secondary" className="ml-2">
+                        {items.length}
+                      </Badge>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-3">
                       {items.map((s) =>
@@ -534,144 +598,159 @@ function OptimizePage() {
       )}
 
       {/* Type B confirm dialog */}
-      {confirmBOpen && (() => {
-        const s = suggestions.find((x) => x.id === confirmBOpen);
-        if (!s || s.type !== "B") return null;
-        const st = bState[s.id] ?? { confirmed: false, placement: "skills" as const, wording: s.keyword };
-        return (
-          <Dialog open onOpenChange={(o) => !o && setConfirmBOpen(null)}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Do you have "{s.keyword}"?</DialogTitle>
-                <DialogDescription>
-                  The JD mentions this but it isn't in your resume. Only confirm if you actually have
-                  the skill — Refine will never add it otherwise.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Where should this go?</label>
-                  <Select
-                    value={st.placement}
-                    onValueChange={(v) =>
+      {confirmBOpen &&
+        (() => {
+          const s = suggestions.find((x) => x.id === confirmBOpen);
+          if (!s || s.type !== "B") return null;
+          const st = bState[s.id] ?? {
+            confirmed: false,
+            placement: "skills" as const,
+            wording: s.keyword,
+          };
+          return (
+            <Dialog open onOpenChange={(o) => !o && setConfirmBOpen(null)}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Do you have "{s.keyword}"?</DialogTitle>
+                  <DialogDescription>
+                    The JD mentions this but it isn't in your resume. Only confirm if you actually
+                    have the skill — Refine will never add it otherwise.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Where should this go?</label>
+                    <Select
+                      value={st.placement}
+                      onValueChange={(v) =>
+                        setBState((p) => ({
+                          ...p,
+                          [s.id]: { ...st, placement: v as "skills" | "experience_bullet" },
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="skills">Skills section</SelectItem>
+                        <SelectItem value="experience_bullet" disabled={!data.experience.length}>
+                          As a bullet under an experience
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {st.placement === "skills" && data.skills.length > 0 && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Skill category</label>
+                      <Select
+                        value={st.category ?? data.skills[0].category}
+                        onValueChange={(v) =>
+                          setBState((p) => ({ ...p, [s.id]: { ...st, category: v } }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {data.skills.map((g) => (
+                            <SelectItem key={g.category} value={g.category}>
+                              {g.category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {st.placement === "experience_bullet" && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Add as bullet under</label>
+                      <Select
+                        value={String(st.expIndex ?? 0)}
+                        onValueChange={(v) =>
+                          setBState((p) => ({ ...p, [s.id]: { ...st, expIndex: Number(v) } }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {data.experience.map((e, i) => (
+                            <SelectItem key={i} value={String(i)}>
+                              {e.role} — {e.company}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      {st.placement === "skills" ? "Exact wording for the skill" : "Bullet wording"}
+                    </label>
+                    {st.placement === "skills" ? (
+                      <Input
+                        value={st.wording}
+                        onChange={(e) =>
+                          setBState((p) => ({ ...p, [s.id]: { ...st, wording: e.target.value } }))
+                        }
+                      />
+                    ) : (
+                      <Textarea
+                        rows={2}
+                        value={st.wording}
+                        onChange={(e) =>
+                          setBState((p) => ({ ...p, [s.id]: { ...st, wording: e.target.value } }))
+                        }
+                        placeholder={`Describe your ${s.keyword} experience honestly…`}
+                      />
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      You control the exact wording. Refine will never invent phrasing for skills
+                      you haven't confirmed.
+                    </p>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="ghost" onClick={() => setConfirmBOpen(null)}>
+                    I don't have this
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (!st.wording.trim()) {
+                        toast.error("Please enter wording before confirming.");
+                        return;
+                      }
                       setBState((p) => ({
                         ...p,
-                        [s.id]: { ...st, placement: v as "skills" | "experience_bullet" },
-                      }))
-                    }
+                        [s.id]: {
+                          ...st,
+                          confirmed: true,
+                          category: st.category ?? data.skills[0]?.category ?? "Skills",
+                          expIndex: st.expIndex ?? 0,
+                        },
+                      }));
+                      setConfirmBOpen(null);
+                    }}
                   >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="skills">Skills section</SelectItem>
-                      <SelectItem value="experience_bullet" disabled={!data.experience.length}>
-                        As a bullet under an experience
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {st.placement === "skills" && data.skills.length > 0 && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Skill category</label>
-                    <Select
-                      value={st.category ?? data.skills[0].category}
-                      onValueChange={(v) =>
-                        setBState((p) => ({ ...p, [s.id]: { ...st, category: v } }))
-                      }
-                    >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {data.skills.map((g) => (
-                          <SelectItem key={g.category} value={g.category}>{g.category}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {st.placement === "experience_bullet" && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Add as bullet under</label>
-                    <Select
-                      value={String(st.expIndex ?? 0)}
-                      onValueChange={(v) =>
-                        setBState((p) => ({ ...p, [s.id]: { ...st, expIndex: Number(v) } }))
-                      }
-                    >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {data.experience.map((e, i) => (
-                          <SelectItem key={i} value={String(i)}>
-                            {e.role} — {e.company}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    {st.placement === "skills" ? "Exact wording for the skill" : "Bullet wording"}
-                  </label>
-                  {st.placement === "skills" ? (
-                    <Input
-                      value={st.wording}
-                      onChange={(e) =>
-                        setBState((p) => ({ ...p, [s.id]: { ...st, wording: e.target.value } }))
-                      }
-                    />
-                  ) : (
-                    <Textarea
-                      rows={2}
-                      value={st.wording}
-                      onChange={(e) =>
-                        setBState((p) => ({ ...p, [s.id]: { ...st, wording: e.target.value } }))
-                      }
-                      placeholder={`Describe your ${s.keyword} experience honestly…`}
-                    />
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    You control the exact wording. Refine will never invent phrasing for skills you
-                    haven't confirmed.
-                  </p>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="ghost" onClick={() => setConfirmBOpen(null)}>
-                  I don't have this
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (!st.wording.trim()) {
-                      toast.error("Please enter wording before confirming.");
-                      return;
-                    }
-                    setBState((p) => ({
-                      ...p,
-                      [s.id]: {
-                        ...st,
-                        confirmed: true,
-                        category: st.category ?? (data.skills[0]?.category ?? "Skills"),
-                        expIndex: st.expIndex ?? 0,
-                      },
-                    }));
-                    setConfirmBOpen(null);
-                  }}
-                >
-                  Yes, I have this
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        );
-      })()}
+                    Yes, I have this
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          );
+        })()}
 
       {/* Save mode confirm */}
       <AlertDialog open={saveOpen} onOpenChange={setSaveOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Apply {totalSelected} suggestion{totalSelected === 1 ? "" : "s"}</AlertDialogTitle>
+            <AlertDialogTitle>
+              Apply {totalSelected} suggestion{totalSelected === 1 ? "" : "s"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Save the changes as a new version (recommended — keeps the current one untouched) or
               overwrite the current version.
@@ -708,7 +787,9 @@ function SuggestionACard({
         <div className="flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <Badge className="bg-primary text-primary-foreground">Type A · safe</Badge>
-            <Badge variant="outline">{s.kind === "add_to_skills" ? "Add to Skills" : "Match JD casing"}</Badge>
+            <Badge variant="outline">
+              {s.kind === "add_to_skills" ? "Add to Skills" : "Match JD casing"}
+            </Badge>
             <span className="text-sm font-medium">{s.keyword}</span>
           </div>
           <p className="text-xs text-muted-foreground">{s.rationale}</p>
@@ -772,11 +853,7 @@ function SuggestionBCard({
                   ? `"${state.wording}" under Skills · ${state.category ?? "?"}`
                   : `Bullet under experience #${(state.expIndex ?? 0) + 1}: "${state.wording}"`}
               </div>
-              <button
-                type="button"
-                onClick={onOpenConfirm}
-                className="mt-2 text-[11px] underline"
-              >
+              <button type="button" onClick={onOpenConfirm} className="mt-2 text-[11px] underline">
                 Edit
               </button>
             </div>
@@ -801,7 +878,9 @@ function HighlightedDiff({ before, after }: { before: string; after: string }) {
         /\s+/.test(p) || beforeTokens.has(p) ? (
           <span key={i}>{p}</span>
         ) : (
-          <mark key={i} className="rounded bg-primary/20 px-0.5 text-primary">{p}</mark>
+          <mark key={i} className="rounded bg-primary/20 px-0.5 text-primary">
+            {p}
+          </mark>
         ),
       )}
     </>

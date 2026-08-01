@@ -16,7 +16,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { TEMPLATES, TEMPLATE_LABELS, resumeDataSchema, type ResumeData, type TemplateId } from "@/lib/resume-schema";
+import {
+  TEMPLATES,
+  TEMPLATE_LABELS,
+  resumeDataSchema,
+  type ResumeData,
+  type TemplateId,
+} from "@/lib/resume-schema";
 import { toast } from "sonner";
 import { Save, Plus, Download, Target, Upload, Check } from "lucide-react";
 import {
@@ -31,7 +37,9 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/resume/$id/edit")({
-  head: () => ({ meta: [{ title: "Edit resume — Refine" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Edit resume — Refine" }, { name: "robots", content: "noindex" }],
+  }),
   component: EditResume,
 });
 
@@ -135,7 +143,9 @@ function EditResume() {
           </SelectTrigger>
           <SelectContent>
             {TEMPLATES.map((t) => (
-              <SelectItem key={t} value={t}>{TEMPLATE_LABELS[t]}</SelectItem>
+              <SelectItem key={t} value={t}>
+                {TEMPLATE_LABELS[t]}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -151,14 +161,18 @@ function EditResume() {
             ))}
           </SelectContent>
         </Select>
-        {activeVersionId &&
-          versions.find((v) => v.id === activeVersionId && !v.is_current) && (
-            <Button size="sm" variant="outline" onClick={() => makeCurrent(activeVersionId!)}>
-              <Check className="mr-1 h-4 w-4" /> Mark current
-            </Button>
-          )}
+        {activeVersionId && versions.find((v) => v.id === activeVersionId && !v.is_current) && (
+          <Button size="sm" variant="outline" onClick={() => makeCurrent(activeVersionId!)}>
+            <Check className="mr-1 h-4 w-4" /> Mark current
+          </Button>
+        )}
         <div className="ml-auto flex flex-wrap gap-2">
-          <Button size="sm" variant="outline" onClick={() => setConfirmOverwrite(true)} disabled={saving}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setConfirmOverwrite(true)}
+            disabled={saving}
+          >
             <Save className="mr-2 h-4 w-4" /> Save version
           </Button>
           <Button size="sm" onClick={() => persist("new")} disabled={saving}>
@@ -168,17 +182,26 @@ function EditResume() {
             <Download className="mr-2 h-4 w-4" /> PDF
           </Button>
           <Link to="/resume/$id/optimize" params={{ id }}>
-            <Button size="sm" variant="ghost"><Target className="mr-2 h-4 w-4" /> Optimize</Button>
+            <Button size="sm" variant="ghost">
+              <Target className="mr-2 h-4 w-4" /> Optimize
+            </Button>
           </Link>
           <Link to="/resume/$id/upload" params={{ id }}>
-            <Button size="sm" variant="ghost"><Upload className="mr-2 h-4 w-4" /> Upload</Button>
+            <Button size="sm" variant="ghost">
+              <Upload className="mr-2 h-4 w-4" /> Upload
+            </Button>
           </Link>
         </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(360px,460px)_1fr]">
         <div className="max-h-[calc(100vh-160px)] overflow-auto pr-1">
-          <ResumeEditor data={data} setData={(fn) => setData((d) => (d ? fn(d) : d))} template={template} onTemplateChange={setTemplate} />
+          <ResumeEditor
+            data={data}
+            setData={(fn) => setData((d) => (d ? fn(d) : d))}
+            template={template}
+            onTemplateChange={setTemplate}
+          />
         </div>
         <Card className="max-h-[calc(100vh-160px)] overflow-auto bg-muted/40 p-4">
           {previewData && (

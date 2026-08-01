@@ -21,7 +21,9 @@ import {
 import { formatDistanceToNow } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Your resumes — Refine" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Your resumes — Refine" }, { name: "robots", content: "noindex" }],
+  }),
   component: Dashboard,
 });
 
@@ -108,8 +110,8 @@ function Dashboard() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete this resume?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This deletes all versions and analyses for “{r.title}”. This cannot
-                            be undone.
+                            This deletes all versions and analyses for “{r.title}”. This cannot be
+                            undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

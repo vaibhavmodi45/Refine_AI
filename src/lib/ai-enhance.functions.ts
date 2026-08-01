@@ -6,7 +6,7 @@ import { resumeDataSchema } from "./resume-schema";
 /**
  * AI-enhanced analysis layer (opt-in).
  *
- * Uses the Lovable AI Gateway (OpenAI-compatible) — no user API key needed.
+ * Uses Cerebras inference (OpenAI-compatible chat completions).
  * Falls back cleanly: on any error the caller shows deterministic-only results.
  *
  * The model is asked ONLY to:
@@ -36,15 +36,24 @@ export type AiEnhanceResult = {
   modelUsed: string;
 };
 
-const PRIMARY_MODEL = "google/gemini-2.5-flash-lite";
-const FALLBACK_MODEL = "google/gemini-2.5-flash";
+const EMPTY_RESULT: AiEnhanceResult = {
+  semanticMatches: [],
+  enhancedRewordings: [],
+  modelUsed: "none",
+};
+
+/** Strong primary for grounding + JSON; lighter fallback if rate-limited or unavailable. */
+const PRIMARY_MODEL = "llama-3.3-70b";
+const FALLBACK_MODEL = "llama3.1-8b";
+
+const CEREBRAS_CHAT_URL = "https://api.cerebras.ai/v1/chat/completions";
 
 export const aiEnhanceAnalysis = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => inputSchema.parse(d))
   .handler(async ({ data }): Promise<AiEnhanceResult> => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
+    const apiKey = process.env.CEREBRAS_API_KEY;
+    if (!apiKey) return EMPTY_RESULT;
 
     const resumeCorpus = buildResumeCorpus(data.resume);
 
@@ -82,7 +91,7 @@ ${data.missingSkills.slice(0, 40).join(", ") || "(none)"}
 `;
 
     const call = async (model: string) => {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const res = await fetch(CEREBRAS_CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -100,7 +109,7 @@ ${data.missingSkills.slice(0, 40).join(", ") || "(none)"}
       });
       if (!res.ok) {
         const body = await res.text().catch(() => "");
-        throw new Error(`AI gateway ${res.status}: ${body.slice(0, 200)}`);
+        throw new Error(`Cerebras API ${res.status}: ${body.slice(0, 200)}`);
       }
       const json = (await res.json()) as {
         choices?: { message?: { content?: string } }[];
@@ -115,33 +124,50 @@ ${data.missingSkills.slice(0, 40).join(", ") || "(none)"}
       raw = await call(modelUsed);
     } catch {
       modelUsed = FALLBACK_MODEL;
-      raw = await call(modelUsed);
+      try {
+        raw = await call(modelUsed);
+      } catch {
+        return EMPTY_RESULT;
+      }
     }
 
     // Validate + sanitize. Drop anything not grounded in resume text.
-    const parsed = z
-      .object({
-        semanticMatches: z
-          .array(
-            z.object({
-              jdTerm: z.string(),
-              matchedIn: z.string(),
-              evidence: z.string(),
-            }),
-          )
-          .default([]),
-        enhancedRewordings: z
-          .array(
-            z.object({
-              section: z.enum(["Summary", "Experience", "Projects"]),
-              before: z.string(),
-              after: z.string(),
-              rationale: z.string(),
-            }),
-          )
-          .default([]),
-      })
-      .parse(raw);
+    let parsed: {
+      semanticMatches: { jdTerm: string; matchedIn: string; evidence: string }[];
+      enhancedRewordings: {
+        section: "Summary" | "Experience" | "Projects";
+        before: string;
+        after: string;
+        rationale: string;
+      }[];
+    };
+    try {
+      parsed = z
+        .object({
+          semanticMatches: z
+            .array(
+              z.object({
+                jdTerm: z.string(),
+                matchedIn: z.string(),
+                evidence: z.string(),
+              }),
+            )
+            .default([]),
+          enhancedRewordings: z
+            .array(
+              z.object({
+                section: z.enum(["Summary", "Experience", "Projects"]),
+                before: z.string(),
+                after: z.string(),
+                rationale: z.string(),
+              }),
+            )
+            .default([]),
+        })
+        .parse(raw);
+    } catch {
+      return { ...EMPTY_RESULT, modelUsed };
+    }
 
     const corpusLower = resumeCorpus.toLowerCase();
     const semanticMatches = parsed.semanticMatches
@@ -149,7 +175,9 @@ ${data.missingSkills.slice(0, 40).join(", ") || "(none)"}
       .slice(0, 25);
 
     const enhancedRewordings = parsed.enhancedRewordings
-      .filter((r) => r.before && r.after && corpusLower.includes(r.before.toLowerCase().slice(0, 40)))
+      .filter(
+        (r) => r.before && r.after && corpusLower.includes(r.before.toLowerCase().slice(0, 40)),
+      )
       .filter((r) => afterIsGrounded(r.after, resumeCorpus))
       .slice(0, 15);
 
@@ -178,7 +206,7 @@ function buildResumeCorpus(r: z.infer<typeof resumeDataSchema>): string {
 // Cheap guard — the corpus filter above is the real safety net.
 function afterIsGrounded(after: string, corpus: string): boolean {
   const corpusLower = corpus.toLowerCase();
-  const tokens = (after.toLowerCase().match(/[a-z0-9+#.\-]{3,}/g) ?? []);
+  const tokens = after.toLowerCase().match(/[a-z0-9+#.\-]{3,}/g) ?? [];
   if (!tokens.length) return false;
   let hits = 0;
   for (const t of tokens) if (corpusLower.includes(t)) hits++;

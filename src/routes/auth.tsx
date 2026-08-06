@@ -31,9 +31,14 @@ function AuthPage() {
   const [verificationNoticeEmail, setVerificationNoticeEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard" });
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (data?.session) navigate({ to: "/dashboard" });
+      })
+      .catch((err) => {
+        console.warn("[Auth] Session check skipped:", err);
+      });
   }, [navigate]);
 
   async function handleSignIn(e: React.FormEvent) {

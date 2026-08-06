@@ -38,7 +38,7 @@ import {
 
 export const Route = createFileRoute("/_authenticated/resume/$id/edit")({
   head: () => ({
-    meta: [{ title: "Edit resume — Refine" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Edit resume — RefineAI" }, { name: "robots", content: "noindex" }],
   }),
   component: EditResume,
 });

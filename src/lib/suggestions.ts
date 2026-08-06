@@ -33,8 +33,8 @@ const PUNCT_SKILL_TOKENS = new Set([
 ]);
 
 function tokenize(text: string): string[] {
-  return (text.toLowerCase().match(/[a-z0-9+#.\-]+/g) ?? [])
-    .map((t) => t.replace(/^[.\-]+|[.\-]+$/g, ""))
+  return (text.toLowerCase().match(/[a-z0-9+#.-]+/g) ?? [])
+    .map((t) => t.replace(/^[.-]+|[.-]+$/g, ""))
     .filter((t) => t.length > 1 && !STOPWORDS.has(t));
 }
 

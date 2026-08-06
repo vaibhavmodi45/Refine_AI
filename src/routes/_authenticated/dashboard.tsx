@@ -22,7 +22,7 @@ import { formatDistanceToNow } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
-    meta: [{ title: "Your resumes — Refine" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Your resumes — RefineAI" }, { name: "robots", content: "noindex" }],
   }),
   component: Dashboard,
 });

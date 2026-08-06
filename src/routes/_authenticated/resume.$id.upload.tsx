@@ -25,7 +25,7 @@ import {
 
 export const Route = createFileRoute("/_authenticated/resume/$id/upload")({
   head: () => ({
-    meta: [{ title: "Upload resume — Refine" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Upload resume — RefineAI" }, { name: "robots", content: "noindex" }],
   }),
   component: UploadPage,
 });

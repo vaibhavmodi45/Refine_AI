@@ -28,13 +28,13 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Refine — Tailor your resume to any job description" },
+      { title: "RefineAI — Tailor your resume to any job description" },
       {
         name: "description",
         content:
-          "Build ATS-friendly resumes, paste any job description, and get rule-based scoring plus safe, grounded suggestions. Export a pixel-perfect PDF.",
+          "Build ATS-friendly resumes, paste any job description, and get rule-based scoring plus safe, grounded suggestions with RefineAI. Export a pixel-perfect PDF.",
       },
-      { property: "og:title", content: "Refine — Tailor your resume to any job description" },
+      { property: "og:title", content: "RefineAI — Tailor your resume to any job description" },
       {
         property: "og:description",
         content:
@@ -127,7 +127,7 @@ function Landing() {
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Link to="/" className="text-lg font-bold tracking-tight">
-            Refine
+            RefineAI
           </Link>
           <nav className="hidden items-center gap-1 md:flex">
             {NAV_LINKS.map((l) => (
@@ -196,7 +196,7 @@ function Landing() {
             The ATS-friendly resume builder that respects the facts.
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-balance text-lg text-muted-foreground">
-            Refine helps you build, upload, and tailor resumes to specific job descriptions.
+            RefineAI helps you build, upload, and tailor resumes to specific job descriptions.
             Rule-based scoring you can trust — and suggestions that only ever use the facts already
             in your resume.
           </p>
@@ -541,7 +541,7 @@ function Landing() {
           <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-3.5 w-3.5 text-primary" />© {new Date().getFullYear()}{" "}
-              Refine
+              RefineAI
             </div>
             <div>Designed and Developed by Vaibhav Modi</div>
           </div>

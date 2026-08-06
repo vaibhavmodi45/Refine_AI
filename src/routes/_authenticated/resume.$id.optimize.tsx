@@ -69,7 +69,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/resume/$id/optimize")({
   head: () => ({
-    meta: [{ title: "Optimize resume — Refine" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Optimize — RefineAI" }, { name: "robots", content: "noindex" }],
   }),
   component: OptimizePage,
 });

@@ -20,7 +20,7 @@ import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/_authenticated/resume/new")({
   head: () => ({
-    meta: [{ title: "New resume — Refine" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "New resume — RefineAI" }, { name: "robots", content: "noindex" }],
   }),
   component: NewResume,
 });

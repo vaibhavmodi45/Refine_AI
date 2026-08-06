@@ -11,7 +11,7 @@ import { Download, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/resume/$id/export")({
   head: () => ({
-    meta: [{ title: "Export resume — Refine" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Export resume — RefineAI" }, { name: "robots", content: "noindex" }],
   }),
   component: ExportResume,
 });

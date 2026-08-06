@@ -193,7 +193,7 @@ function buildResumeCorpus(r: z.infer<typeof resumeDataSchema>): string {
   });
   r.projects.forEach((p) => {
     parts.push(`PROJECT: ${p.name}${p.description ? ` - ${p.description}` : ""}`);
-    (p.techStack ?? []).length && parts.push(`Tech: ${(p.techStack ?? []).join(", ")}`);
+    if ((p.techStack ?? []).length) parts.push(`Tech: ${(p.techStack ?? []).join(", ")}`);
     p.bullets.forEach((b) => parts.push(`- ${b}`));
   });
   r.skills.forEach((s) => parts.push(`SKILLS ${s.category}: ${s.items.join(", ")}`));
@@ -206,7 +206,7 @@ function buildResumeCorpus(r: z.infer<typeof resumeDataSchema>): string {
 // Cheap guard — the corpus filter above is the real safety net.
 function afterIsGrounded(after: string, corpus: string): boolean {
   const corpusLower = corpus.toLowerCase();
-  const tokens = after.toLowerCase().match(/[a-z0-9+#.\-]{3,}/g) ?? [];
+  const tokens = after.toLowerCase().match(/[a-z0-9+#.-]{3,}/g) ?? [];
   if (!tokens.length) return false;
   let hits = 0;
   for (const t of tokens) if (corpusLower.includes(t)) hits++;

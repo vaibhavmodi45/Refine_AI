@@ -6,14 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { MailCheck } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — Refine" },
-      { name: "description", content: "Sign in or create your Refine account." },
-      { property: "og:title", content: "Sign in — Refine" },
-      { property: "og:description", content: "Sign in or create your Refine account." },
+      { title: "Sign in — RefineAI" },
+      { name: "description", content: "Sign in or create your RefineAI account." },
+      { property: "og:title", content: "Sign in — RefineAI" },
+      { property: "og:description", content: "Sign in or create your RefineAI account." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -22,10 +23,12 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [verificationNoticeEmail, setVerificationNoticeEmail] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -38,14 +41,22 @@ function AuthPage() {
     setBusy(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      if (error.message.toLowerCase().includes("email not confirmed")) {
+        return toast.error("Email not confirmed yet", {
+          description: "Please check your email inbox and click the verification link before logging in.",
+          duration: 6000,
+        });
+      }
+      return toast.error(error.message);
+    }
     navigate({ to: "/dashboard" });
   }
 
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -55,7 +66,18 @@ function AuthPage() {
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Check your email to confirm your account.");
+
+    if (data.session) {
+      toast.success("Account created successfully! Welcome to RefineAI.");
+      navigate({ to: "/dashboard" });
+    } else {
+      setVerificationNoticeEmail(email);
+      setActiveTab("signin");
+      toast.success("Account created successfully!", {
+        description: `A verification email has been sent to ${email}. Please check your inbox and confirm your email before signing in.`,
+        duration: 8000,
+      });
+    }
   }
 
   async function handleGoogle() {
@@ -70,17 +92,16 @@ function AuthPage() {
       setBusy(false);
       return toast.error(error.message || "Google sign-in failed");
     }
-    // Browser navigates away to Google, then back via redirectTo.
   }
 
   return (
     <div className="min-h-screen bg-muted/30">
       <div className="mx-auto flex max-w-md flex-col px-6 pt-16">
         <Link to="/" className="mb-6 text-sm text-muted-foreground hover:text-foreground">
-          ← Back to Refine
+          ← Back to RefineAI
         </Link>
         <div className="rounded-xl border bg-card p-6 shadow-sm">
-          <h1 className="text-xl font-semibold tracking-tight">Welcome to Refine</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Welcome to RefineAI</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Build, score, and export ATS-friendly resumes.
           </p>
@@ -92,12 +113,25 @@ function AuthPage() {
             <div className="h-px flex-1 bg-border" /> or <div className="h-px flex-1 bg-border" />
           </div>
 
-          <Tabs defaultValue="signin">
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "signin" | "signup")}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign in</TabsTrigger>
               <TabsTrigger value="signup">Sign up</TabsTrigger>
             </TabsList>
             <TabsContent value="signin">
+              {verificationNoticeEmail && (
+                <div className="mt-4 rounded-lg border border-blue-500/30 bg-blue-500/10 p-3.5 text-sm text-blue-900 dark:text-blue-200">
+                  <div className="flex items-start gap-2.5">
+                    <MailCheck className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Verification link sent!</p>
+                      <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                        We sent a verification link to <strong className="text-foreground">{verificationNoticeEmail}</strong>. Please check your inbox and verify your email before logging in below.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
               <form onSubmit={handleSignIn} className="mt-4 space-y-3">
                 <div>
                   <Label htmlFor="e1">Email</Label>

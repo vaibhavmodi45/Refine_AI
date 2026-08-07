@@ -14,14 +14,14 @@ Build, optimize, and export ATS-friendly resumes tailored to any job description
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| Framework | [TanStack Start](https://tanstack.com/start) (React 19, SSR, file-based routing) |
-| Styling | [Tailwind CSS v4](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
-| Auth & Database | [Supabase](https://supabase.com/) (PostgreSQL, Auth, Row Level Security) |
-| AI | [Cerebras](https://cerebras.ai/) (fast inference for resume wording suggestions) |
-| PDF Export | jsPDF + html2canvas |
-| Deploy | Vercel (via Nitro) |
+| Layer           | Technology                                                                        |
+| --------------- | --------------------------------------------------------------------------------- |
+| Framework       | [TanStack Start](https://tanstack.com/start) (React 19, SSR, file-based routing)  |
+| Styling         | [Tailwind CSS v4](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
+| Auth & Database | [Supabase](https://supabase.com/) (PostgreSQL, Auth, Row Level Security)          |
+| AI              | [Cerebras](https://cerebras.ai/) (fast inference for resume wording suggestions)  |
+| PDF Export      | jsPDF + html2canvas                                                               |
+| Deploy          | Vercel (via Nitro)                                                                |
 
 ## Getting Started
 
@@ -47,7 +47,7 @@ npm run dev
 See [`.env.example`](.env.example) for the full list with inline documentation. You'll need:
 
 - **Supabase** — project URL, publishable key, service role key, and project ID (from your [Supabase dashboard](https://supabase.com/dashboard))
-- **Cerebras** *(optional)* — API key for AI-enhanced analysis (from [Cerebras Cloud](https://cloud.cerebras.ai))
+- **Cerebras** _(optional)_ — API key for AI-enhanced analysis (from [Cerebras Cloud](https://cloud.cerebras.ai))
 
 ### Google OAuth Setup
 
@@ -59,13 +59,13 @@ To enable "Sign in with Google", configure it in your Supabase dashboard:
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start the development server |
-| `npm run build` | Production build (Vercel preset) |
+| Command           | Description                          |
+| ----------------- | ------------------------------------ |
+| `npm run dev`     | Start the development server         |
+| `npm run build`   | Production build (Vercel preset)     |
 | `npm run preview` | Preview the production build locally |
-| `npm run lint` | Run ESLint |
-| `npm run format` | Format code with Prettier |
+| `npm run lint`    | Run ESLint                           |
+| `npm run format`  | Format code with Prettier            |
 
 ## License
 

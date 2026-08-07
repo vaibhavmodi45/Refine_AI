@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -22,23 +22,30 @@ import {
   Repeat,
   ShieldCheck,
   FileDown,
-  ListChecks,
+  ArrowRight,
+  TrendingUp,
+  Zap,
+  Star,
+  CheckCircle,
+  Layers,
+  ChevronRight,
+  SlidersHorizontal,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "RefineAI — Tailor your resume to any job description" },
+      { title: "RefineAI — AI-Powered ATS Resume Builder & Analyzer" },
       {
         name: "description",
         content:
-          "Build ATS-friendly resumes, paste any job description, and get rule-based scoring plus safe, grounded suggestions with RefineAI. Export a pixel-perfect PDF.",
+          "Build ATS-friendly resumes, paste any job description, and get rule-based scoring plus safe, grounded suggestions with RefineAI. Export a pixel-perfect PDF directly.",
       },
-      { property: "og:title", content: "RefineAI — Tailor your resume to any job description" },
+      { property: "og:title", content: "RefineAI — AI-Powered ATS Resume Builder & Analyzer" },
       {
         property: "og:description",
         content:
-          "Deterministic ATS scoring, JD-specific suggestions that never invent facts, and PDF export that matches the preview exactly.",
+          "Deterministic ATS scoring, JD-specific suggestions that never invent facts, and direct PDF download.",
       },
     ],
   }),
@@ -46,108 +53,140 @@ export const Route = createFileRoute("/")({
 });
 
 const NAV_LINKS = [
+  { href: "#features", label: "Features" },
   { href: "#how", label: "How it works" },
   { href: "#who", label: "Who it's for" },
   { href: "#compare", label: "Compare" },
   { href: "#faq", label: "FAQ" },
 ];
 
-function Feature({
-  icon: Icon,
-  title,
-  children,
-}: {
-  icon: typeof FileText;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
-      <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-        <Icon className="h-5 w-5" />
-      </div>
-      <h3 className="text-base font-semibold">{title}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{children}</p>
-    </div>
-  );
-}
+// Interactive Demo presets for the Hero Section Sandbox
+const DEMO_PRESETS = [
+  {
+    role: "Senior Full-Stack Engineer",
+    score: 96,
+    matchedKeywords: ["TypeScript", "React", "Node.js", "GraphQL", "CI/CD", "TailwindCSS"],
+    missingKeywords: ["Docker"],
+    originalBullet: "Worked on frontend and backend features for the web application.",
+    refinedBullet:
+      "Engineered scalable React & Node.js microservices, cutting p95 API latency by 42% for 50k+ daily active users.",
+  },
+  {
+    role: "AI Product Manager",
+    score: 92,
+    matchedKeywords: [
+      "Roadmap",
+      "Agile",
+      "User Research",
+      "A/B Testing",
+      "SQL",
+      "Product Analytics",
+    ],
+    missingKeywords: ["Jira Admin"],
+    originalBullet: "Helped team improve user retention on the onboarding flow.",
+    refinedBullet:
+      "Spearheaded core AI onboarding redesign, boosting 30-day user retention by 28% across 6 sprint cycles.",
+  },
+  {
+    role: "Lead Data Scientist",
+    score: 89,
+    matchedKeywords: ["Python", "SQL", "PyTorch", "Snowflake", "dbt", "Airflow"],
+    missingKeywords: ["Kubernetes"],
+    originalBullet: "Built machine learning models to analyze data pipelines.",
+    refinedBullet:
+      "Deployed automated PyTorch prediction pipelines processing 2TB daily streaming analytics on Snowflake.",
+  },
+];
 
-function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
-  return (
-    <div className="relative rounded-xl border bg-card p-6 shadow-sm">
-      <div className="absolute -top-3 left-6 inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shadow">
-        {n}
-      </div>
-      <h3 className="mt-2 text-base font-semibold">{title}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{children}</p>
-    </div>
-  );
-}
+/**
+ * Scroll Reveal Hook to fade & slide elements on viewport intersection
+ */
+function useScrollReveal() {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" },
+    );
 
-function Persona({
-  icon: Icon,
-  title,
-  children,
-}: {
-  icon: typeof GraduationCap;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-xl border bg-card p-6 shadow-sm">
-      <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-        <Icon className="h-5 w-5" />
-      </div>
-      <h3 className="text-base font-semibold">{title}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{children}</p>
-    </div>
-  );
+    const elements = document.querySelectorAll(".reveal-on-scroll");
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
 }
 
 function Landing() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [activePreset, setActivePreset] = useState(0);
+  const [showRefined, setShowRefined] = useState(true);
+
+  useScrollReveal();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const demo = DEMO_PRESETS[activePreset];
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary overflow-x-hidden">
+      {/* Glassmorphic Sticky Navbar with Fixed Spacing */}
       <header
         className={
-          "sticky top-0 z-40 w-full border-b transition-colors " +
+          "sticky top-0 z-50 w-full border-b transition-all duration-300 " +
           (scrolled
-            ? "bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70"
-            : "bg-background")
+            ? "bg-background/80 backdrop-blur-md border-border/60 shadow-xs py-2.5"
+            : "bg-transparent border-transparent py-4")
         }
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Link to="/" className="text-lg font-bold tracking-tight">
-            RefineAI
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-8">
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground font-black text-base shadow-sm transition-transform group-hover:scale-105">
+              R
+            </div>
+            <span className="text-xl font-bold tracking-tight">
+              Refine<span className="text-primary font-black">AI</span>
+            </span>
           </Link>
-          <nav className="hidden items-center gap-1 md:flex">
+
+          {/* Navigation Links with Proper Spacing & Gaps */}
+          <nav className="hidden items-center gap-8 md:flex">
             {NAV_LINKS.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
-                className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                className="text-sm font-medium text-muted-foreground transition-all hover:text-foreground hover:scale-105"
               >
                 {l.label}
               </a>
             ))}
           </nav>
-          <div className="hidden items-center gap-2 md:flex">
-            <Button asChild variant="ghost" size="sm">
+
+          <div className="hidden items-center gap-3 md:flex">
+            <Button asChild variant="ghost" size="sm" className="font-medium text-sm">
               <Link to="/auth">Sign in</Link>
             </Button>
-            <Button asChild size="sm">
-              <Link to="/auth">Get started</Link>
+            <Button
+              asChild
+              size="sm"
+              className="shadow-sm font-semibold hover:scale-[1.02] active:scale-[0.98] transition-all px-5"
+            >
+              <Link to="/auth">
+                Get Started Free <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Link>
             </Button>
           </div>
+
           <div className="md:hidden">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
@@ -156,26 +195,26 @@ function Landing() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-72">
-                <div className="mt-6 flex flex-col gap-1">
+                <div className="mt-6 flex flex-col gap-3">
                   {NAV_LINKS.map((l) => (
                     <a
                       key={l.href}
                       href={l.href}
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-md px-3 py-2 text-sm hover:bg-accent"
+                      className="rounded-md px-3 py-2.5 text-base font-medium hover:bg-accent"
                     >
                       {l.label}
                     </a>
                   ))}
-                  <div className="mt-4 grid gap-2">
-                    <Button asChild variant="outline">
+                  <div className="mt-6 grid gap-2.5">
+                    <Button asChild variant="outline" className="w-full">
                       <Link to="/auth" onClick={() => setMobileOpen(false)}>
                         Sign in
                       </Link>
                     </Button>
-                    <Button asChild>
+                    <Button asChild className="w-full">
                       <Link to="/auth" onClick={() => setMobileOpen(false)}>
-                        Get started
+                        Get Started Free
                       </Link>
                     </Button>
                   </div>
@@ -186,309 +225,527 @@ function Landing() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="mx-auto max-w-6xl px-6 pt-16 pb-16 sm:pt-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border bg-accent/50 px-3 py-1 text-xs font-medium">
-            <Sparkles className="h-3.5 w-3.5" /> Deterministic scoring · grounded suggestions
-          </div>
-          <h1 className="text-balance text-5xl font-bold tracking-tight sm:text-6xl">
-            The ATS-friendly resume builder that respects the facts.
-          </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-balance text-lg text-muted-foreground">
-            RefineAI helps you build, upload, and tailor resumes to specific job descriptions.
-            Rule-based scoring you can trust — and suggestions that only ever use the facts already
-            in your resume.
-          </p>
-          <div className="mt-8 flex justify-center gap-3">
-            <Button asChild size="lg">
-              <Link to="/auth">Build my resume</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <a href="#how">See how it works</a>
-            </Button>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden pt-10 pb-20 sm:pt-16 sm:pb-28 bg-grid-pattern">
+        {/* Glowing Background Spheres */}
+        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-primary/10 blur-[140px]" />
+        <div className="pointer-events-none absolute right-10 top-1/3 -z-10 h-[350px] w-[450px] rounded-full bg-indigo-500/10 blur-[120px]" />
 
-      {/* Feature grid */}
-      <section id="features" className="mx-auto max-w-6xl px-6 pb-20">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Feature icon={FileText} title="3 ATS-safe templates">
-            Classic, Modern, Fresher. Single-column, semantic HTML, printer-friendly typography.
-          </Feature>
-          <Feature icon={Upload} title="Upload & parse">
-            Import a PDF or DOCX resume and edit it as structured sections — no retyping.
-          </Feature>
-          <Feature icon={Target} title="Deterministic scoring">
-            Rule-based ATS checks and keyword match. No black boxes, no hallucinated numbers.
-          </Feature>
-          <Feature icon={Sparkles} title="Grounded suggestions">
-            Reword bullets, surface skills you already demonstrate, flag anything you don't have.
-          </Feature>
-        </div>
-      </section>
+        <div className="mx-auto max-w-7xl px-4 sm:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            {/* Pill Badge */}
+            <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary backdrop-blur-md shadow-xs animate-in fade-in duration-500">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span>Deterministic ATS Scoring &amp; Zero Hallucination Engine v2.0</span>
+            </div>
 
-      {/* How it works */}
-      <section id="how" className="border-t bg-muted/30 py-20">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">How Refine works</h2>
-            <p className="mt-3 text-muted-foreground">
-              Five steps from a blank page (or an existing PDF) to a job-specific, ATS-scored
-              resume.
+            <h1 className="text-balance text-4xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl leading-[1.1]">
+              Build resumes that pass the{" "}
+              <span className="bg-gradient-to-r from-primary via-indigo-600 to-sky-500 bg-clip-text text-transparent">
+                ATS scanner
+              </span>{" "}
+              every time.
+            </h1>
+
+            <p className="mx-auto mt-6 max-w-2xl text-balance text-lg text-muted-foreground leading-relaxed">
+              RefineAI parses your resume, scores it against target job descriptions in real-time,
+              and provides grounded bullet improvements using facts already in your experience.
             </p>
-          </div>
-          <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-5">
-            <Step n={1} title="Build or upload">
-              Start from a Classic, Modern, or Fresher template — or upload your existing PDF/DOCX
-              and Refine parses it into editable sections.
-            </Step>
-            <Step n={2} title="Paste the JD">
-              Drop the full job description into the Optimize screen for the resume version you're
-              tailoring.
-            </Step>
-            <Step n={3} title="Review suggestions">
-              See two kinds: safe rewording using words already in your resume, and honest flags for
-              skills the JD wants that you don't have.
-            </Step>
-            <Step n={4} title="Confirm & apply">
-              Toggle each suggestion, confirm any missing skills you actually do have, then apply
-              the batch as a new version or overwrite the current one.
-            </Step>
-            <Step n={5} title="Score & export">
-              Compare before/after ATS and match scores, then export a PDF that pixel-matches the
-              live preview.
-            </Step>
-          </div>
-        </div>
-      </section>
 
-      {/* Who it's for */}
-      <section id="who" className="mx-auto max-w-6xl px-6 py-20">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Who Refine is for</h2>
-          <p className="mt-3 text-muted-foreground">
-            Refine is built for people applying to real jobs, not for generic resume decoration.
-          </p>
-        </div>
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          <Persona icon={GraduationCap} title="Students & fresh graduates">
-            Turn coursework, projects, and internships into an ATS-parseable first resume with the
-            Fresher template, and check every application against the actual JD before sending.
-          </Persona>
-          <Persona icon={Briefcase} title="Experienced professionals">
-            Keep one canonical resume and spin off tailored versions per role — surface the right
-            skills, match the JD's phrasing, and export each one without breaking formatting.
-          </Persona>
-          <Persona icon={Repeat} title="Career switchers">
-            Reframe existing bullets around the vocabulary of the new field. Refine flags gaps
-            honestly so you can decide what to learn next rather than paper over what you don't
-            know.
-          </Persona>
-        </div>
-      </section>
+            <div className="mt-8 flex flex-wrap justify-center gap-4">
+              <Button
+                asChild
+                size="lg"
+                className="h-12 px-8 text-base shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.98] transition-all font-semibold"
+              >
+                <Link to="/auth">
+                  Build My Resume <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="h-12 px-7 text-base hover:bg-accent transition-all font-medium"
+              >
+                <a href="#how">See How It Works</a>
+              </Button>
+            </div>
 
-      {/* Comparison */}
-      <section id="compare" className="border-t bg-muted/30 py-20">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Refine vs. a typical resume builder
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Most builders stop at pretty templates. Refine is built around the job you're applying
-              to.
-            </p>
-          </div>
-          <div className="mt-10 overflow-x-auto rounded-xl border bg-card shadow-sm">
-            <table className="w-full min-w-[560px] text-left text-sm">
-              <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
-                <tr>
-                  <th className="p-4 font-medium">Capability</th>
-                  <th className="p-4 font-medium">Typical builder</th>
-                  <th className="p-4 font-medium text-primary">Refine</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {[
-                  ["ATS-safe single-column templates", true, true],
-                  ["Upload existing PDF/DOCX and edit as structured data", false, true],
-                  ["Rule-based ATS score you can inspect", false, true],
-                  ["Match score against a specific job description", false, true],
-                  ["Suggestions grounded in your own resume text", false, true],
-                  ["Explicit confirmation before adding a missing skill", false, true],
-                  ["Multiple named versions per resume", false, true],
-                  ["PDF export that exactly matches the live preview", false, true],
-                ].map(([label, gen, refine]) => (
-                  <tr key={label as string}>
-                    <td className="p-4">{label}</td>
-                    <td className="p-4">
-                      {gen ? (
-                        <Check className="h-4 w-4 text-primary" />
-                      ) : (
-                        <X className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </td>
-                    <td className="p-4">
-                      {refine ? (
-                        <Check className="h-4 w-4 text-primary" />
-                      ) : (
-                        <X className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust bar */}
-      <section className="mx-auto max-w-6xl px-6 py-16">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            {
-              icon: ShieldCheck,
-              title: "RLS-protected data",
-              body: "Your resumes live in a database where row-level security means only you can read your own rows.",
-            },
-            {
-              icon: ListChecks,
-              title: "Multiple versions",
-              body: "Keep an original master and as many tailored versions as you need — mark one as current at a time.",
-            },
-            {
-              icon: FileDown,
-              title: "Preview = PDF",
-              body: "The exported PDF is generated from the same DOM as the on-screen preview, so what you see is what you send.",
-            },
-            {
-              icon: Sparkles,
-              title: "Opt-in AI",
-              body: "Core scoring and suggestions don't require any AI call. AI-assisted wording is optional and always grounded.",
-            },
-          ].map(({ icon: Icon, title, body }) => (
-            <div key={title} className="flex gap-3">
-              <div className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                <Icon className="h-4 w-4" />
+            {/* Social Proof */}
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-xs font-medium text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Free export
               </div>
-              <div>
-                <div className="text-sm font-semibold">{title}</div>
-                <div className="text-sm text-muted-foreground">{body}</div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Direct 1-Click PDF download
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> No credit card required
               </div>
             </div>
-          ))}
+          </div>
+
+          {/* Interactive Live ATS Showcase Card */}
+          <div className="mt-14 overflow-hidden rounded-2xl border bg-card/80 p-4 sm:p-7 shadow-2xl backdrop-blur-xl transition-all reveal-on-scroll">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b pb-4">
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-rose-500/80" />
+                <div className="h-3 w-3 rounded-full bg-amber-500/80" />
+                <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
+                <span className="ml-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Live ATS Interactive Sandbox
+                </span>
+              </div>
+
+              {/* Role Preset Tabs */}
+              <div className="flex items-center gap-2 rounded-xl bg-muted/80 p-1.5 text-xs">
+                {DEMO_PRESETS.map((p, idx) => (
+                  <button
+                    key={p.role}
+                    onClick={() => setActivePreset(idx)}
+                    className={
+                      "rounded-lg px-3.5 py-1.5 font-medium transition-all cursor-pointer " +
+                      (activePreset === idx
+                        ? "bg-background text-foreground shadow-sm font-bold"
+                        : "text-muted-foreground hover:text-foreground")
+                    }
+                  >
+                    {p.role}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-12">
+              {/* Left Column: Sample Resume Card */}
+              <div className="lg:col-span-7 rounded-xl border bg-background p-6 text-left shadow-xs">
+                <div className="flex items-center justify-between border-b pb-3">
+                  <div>
+                    <h3 className="font-bold text-foreground text-base">Alex Morgan</h3>
+                    <p className="text-xs text-muted-foreground">
+                      San Francisco, CA · alex.morgan@example.com
+                    </p>
+                  </div>
+                  <span className="rounded-md bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground border">
+                    Classic ATS Template
+                  </span>
+                </div>
+
+                {/* Grounded Bullet Improver Sandbox */}
+                <div className="mt-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      Bullet Optimization Comparison
+                    </span>
+                    <button
+                      onClick={() => setShowRefined(!showRefined)}
+                      className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary hover:bg-primary/20 transition-all cursor-pointer"
+                    >
+                      <SlidersHorizontal className="h-3 w-3" /> Toggle{" "}
+                      {showRefined ? "Original" : "Optimized"}
+                    </button>
+                  </div>
+
+                  <div className="rounded-lg border bg-muted/20 p-3 text-xs leading-relaxed transition-all">
+                    {showRefined ? (
+                      <div className="space-y-1">
+                        <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mb-1">
+                          <Sparkles className="h-3 w-3" /> RefineAI Grounded Optimization
+                        </div>
+                        <p className="text-foreground font-medium">{demo.refinedBullet}</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <div className="inline-flex items-center gap-1 text-[11px] font-bold text-muted-foreground mb-1">
+                          Original Draft
+                        </div>
+                        <p className="text-muted-foreground">{demo.originalBullet}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-5 pt-3 border-t">
+                  <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                    Matched Keywords ({demo.matchedKeywords.length})
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {demo.matchedKeywords.map((kw) => (
+                      <span
+                        key={kw}
+                        className="rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 px-2.5 py-1 text-[11px] font-semibold border border-emerald-500/20"
+                      >
+                        ✓ {kw}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: ATS Match Gauge & Analysis */}
+              <div className="lg:col-span-5 flex flex-col justify-between rounded-xl border bg-accent/30 p-6 text-left">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      ATS Match Score
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-3 py-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                      <TrendingUp className="h-3.5 w-3.5" /> High Match
+                    </span>
+                  </div>
+
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <span className="text-5xl font-extrabold tracking-tight text-foreground">
+                      {demo.score}%
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Compatibility with Job Posting
+                    </span>
+                  </div>
+
+                  {/* Animated Score Progress Bar */}
+                  <div className="mt-3 h-3 w-full rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-primary transition-all duration-700 ease-out"
+                      style={{ width: `${demo.score}%` }}
+                    />
+                  </div>
+
+                  <div className="mt-6 space-y-2">
+                    <div className="text-xs font-bold text-foreground">Optimization Breakdown</div>
+                    <div className="rounded-lg border bg-background/90 p-3.5 text-xs space-y-2">
+                      <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <Check className="h-4 w-4" /> 100% Grounded in your experience
+                      </div>
+                      <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold">
+                        <Zap className="h-4 w-4" /> Missing keyword alert:{" "}
+                        {demo.missingKeywords.join(", ")}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <Button asChild className="w-full h-11 font-semibold shadow-xs">
+                    <Link to="/auth">Analyze My Resume Now</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Bento Grid Features Section */}
+      <section id="features" className="py-20 border-t bg-muted/20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8">
+          <div className="mx-auto max-w-2xl text-center reveal-on-scroll">
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-5xl">
+              Engineered for candidates who want callbacks.
+            </h2>
+            <p className="mt-4 text-muted-foreground text-balance text-base">
+              Unlike generic AI writers that invent fake accomplishments, RefineAI uses
+              deterministic ATS scoring and strict factual grounding.
+            </p>
+          </div>
+
+          <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="group rounded-2xl border bg-card p-6 shadow-xs transition-all hover:border-primary/40 hover:shadow-lg hover:-translate-y-1 reveal-on-scroll">
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                <FileText className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-bold">3 ATS-Safe Templates</h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                Classic, Modern, and Fresher templates designed in single-column semantic HTML to
+                pass every ATS parser cleanly.
+              </p>
+            </div>
+
+            <div className="group rounded-2xl border bg-card p-6 shadow-xs transition-all hover:border-primary/40 hover:shadow-lg hover:-translate-y-1 reveal-on-scroll">
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                <Upload className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-bold">PDF &amp; DOCX Import</h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                Upload your existing resume file. RefineAI extracts experience, education, and
+                skills automatically without manual copy-pasting.
+              </p>
+            </div>
+
+            <div className="group rounded-2xl border bg-card p-6 shadow-xs transition-all hover:border-primary/40 hover:shadow-lg hover:-translate-y-1 reveal-on-scroll">
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                <Target className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-bold">Deterministic ATS Scoring</h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                Clear rule-based algorithm checks keyword density, formatting hygiene, and section
+                completeness with 100% transparency.
+              </p>
+            </div>
+
+            <div className="group rounded-2xl border bg-card p-6 shadow-xs transition-all hover:border-primary/40 hover:shadow-lg hover:-translate-y-1 reveal-on-scroll">
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                <FileDown className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-bold">Direct 1-Click PDF Download</h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                Download high-resolution PDF files directly to your device with 1 click — no print
+                dialogs, no formatting glitches.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How it Works Step-by-Step */}
+      <section id="how" className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8">
+          <div className="mx-auto max-w-2xl text-center reveal-on-scroll">
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+              How RefineAI Works
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Five simple steps to turn any resume into a job-matched magnet.
+            </p>
+          </div>
+
+          <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+            {[
+              {
+                step: "01",
+                title: "Build or Upload",
+                desc: "Start from scratch or upload your existing PDF/DOCX resume.",
+              },
+              {
+                step: "02",
+                title: "Paste Job Posting",
+                desc: "Target any specific role by pasting the job posting requirements.",
+              },
+              {
+                step: "03",
+                title: "Review Suggestions",
+                desc: "Get safe bullet improvements and missing keyword alerts.",
+              },
+              {
+                step: "04",
+                title: "Confirm & Apply",
+                desc: "Approve improvements and create tailored resume versions easily.",
+              },
+              {
+                step: "05",
+                title: "Direct Download",
+                desc: "Export crisp, pixel-perfect PDF files directly to your device.",
+              },
+            ].map((item) => (
+              <div
+                key={item.step}
+                className="relative rounded-2xl border bg-card p-6 shadow-xs transition-all hover:border-primary/40 hover:shadow-md reveal-on-scroll"
+              >
+                <div className="text-3xl font-black text-primary/30 mb-2">{item.step}</div>
+                <h3 className="text-base font-bold text-foreground">{item.title}</h3>
+                <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Target Audiences */}
+      <section id="who" className="py-20 border-t bg-muted/20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8">
+          <div className="mx-auto max-w-2xl text-center reveal-on-scroll">
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Tailored for Every Stage
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Built for professionals who need results, not generic templates.
+            </p>
+          </div>
+
+          <div className="mt-14 grid gap-6 md:grid-cols-3">
+            <div className="rounded-2xl border bg-card p-7 shadow-xs reveal-on-scroll">
+              <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <GraduationCap className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-bold">Students &amp; Fresh Grads</h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                Use our Fresher template to highlight projects, coursework, and internships in clean
+                ATS format.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border bg-card p-7 shadow-xs reveal-on-scroll">
+              <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Briefcase className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-bold">Experienced Professionals</h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                Maintain one master profile and generate customized versions for senior, lead, or
+                manager roles in seconds.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border bg-card p-7 shadow-xs reveal-on-scroll">
+              <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Repeat className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-bold">Career Switchers</h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                Reframe existing accomplishments into the vocabulary of target industries without
+                embellishment.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Comparison Table */}
+      <section id="compare" className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8">
+          <div className="mx-auto max-w-2xl text-center reveal-on-scroll">
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+              RefineAI vs. Typical Builders
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Most resume builders focus on vanity designs. We focus on getting you hired.
+            </p>
+          </div>
+
+          <div className="mt-12 overflow-hidden rounded-2xl border bg-card shadow-xs reveal-on-scroll">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-muted/50 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="p-4 sm:p-5">Capability</th>
+                    <th className="p-4 sm:p-5">Generic Resume Builder</th>
+                    <th className="p-4 sm:p-5 text-primary">RefineAI</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {[
+                    ["ATS-Verified Single Column Layouts", true, true],
+                    ["PDF & DOCX Parsing into Structured Data", false, true],
+                    ["Transparent, Rule-Based Keyword Match", false, true],
+                    ["Zero Hallucination Bullet Optimization", false, true],
+                    ["Multiple Target Versions Per Resume", false, true],
+                    ["Direct 1-Click Browser PDF Download", false, true],
+                  ].map(([cap, typical, refine]) => (
+                    <tr key={cap as string} className="hover:bg-accent/40 transition-colors">
+                      <td className="p-4 sm:p-5 font-semibold text-foreground">{cap}</td>
+                      <td className="p-4 sm:p-5">
+                        {typical ? (
+                          <Check className="h-4 w-4 text-emerald-500" />
+                        ) : (
+                          <X className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </td>
+                      <td className="p-4 sm:p-5">
+                        {refine ? (
+                          <Check className="h-4 w-4 text-primary font-bold" />
+                        ) : (
+                          <X className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="border-t bg-muted/30 py-20">
-        <div className="mx-auto max-w-3xl px-6">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Frequently asked questions
+      <section id="faq" className="py-20 border-t bg-muted/20">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <div className="text-center reveal-on-scroll">
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Frequently Asked Questions
             </h2>
             <p className="mt-3 text-muted-foreground">
-              Straight answers about how Refine actually behaves.
+              Everything you need to know about RefineAI.
             </p>
           </div>
-          <Accordion type="single" collapsible className="mt-10">
-            <AccordionItem value="q1">
-              <AccordionTrigger>Will the AI make up things I haven't done?</AccordionTrigger>
-              <AccordionContent>
-                No. Core scoring and rewording suggestions are pure rule-based TypeScript — they
-                only use words already in your resume (e.g. matching a JD's exact casing, or
-                promoting a skill you already mention in a bullet into your Skills section).
-                AI-enhanced analysis is an optional toggle on the Optimize screen: when enabled, it
-                flags semantic matches (e.g. "built REST APIs" satisfying "API design") and proposes
-                tighter phrasing, but every AI output is grounded against your resume text and never
-                adds new skills. Missing skills always require an explicit Type B confirmation with
-                your own wording.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="q2">
-              <AccordionTrigger>What file formats can I upload?</AccordionTrigger>
-              <AccordionContent>
-                PDF and DOCX. Refine extracts the text client-side, runs a heuristic segmenter to
-                map it into structured sections (Personal info, Experience, Education, Projects,
-                Skills, etc.), and drops you into a review screen so you can fix any parsing
-                mistakes before saving.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="q3">
-              <AccordionTrigger>Is my resume data private?</AccordionTrigger>
-              <AccordionContent>
-                Yes. Every resume, version, and job description is stored behind row-level security
-                — the database policies mean only the authenticated owner of a row can read or
-                modify it. Refine's server code accesses your data using your own session, not an
-                admin key.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="q4">
-              <AccordionTrigger>Do I need to use the AI features?</AccordionTrigger>
-              <AccordionContent>
-                No. ATS scoring, keyword reporting, and the entire suggestions engine are pure
-                rule-based TypeScript. You can build, tailor, and export a full resume without any
-                AI call ever happening. AI-assisted wording is a separate opt-in step layered on
-                top.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="q5">
-              <AccordionTrigger>
-                Can I keep multiple tailored versions of the same resume?
+
+          <Accordion type="single" collapsible className="mt-12 space-y-3 reveal-on-scroll">
+            <AccordionItem value="q1" className="rounded-xl border bg-card px-5 py-1">
+              <AccordionTrigger className="font-semibold text-left">
+                Will RefineAI invent fake experience?
               </AccordionTrigger>
-              <AccordionContent>
-                Yes. Each resume can have any number of named versions. You can mark one as the
-                current version, apply suggestions as a new version to keep the original untouched,
-                and switch between versions from the editor at any time.
+              <AccordionContent className="text-muted-foreground leading-relaxed">
+                No. RefineAI operates on strict factual grounding. Suggestions reword and emphasize
+                existing accomplishments from your resume to match job description phrasing without
+                hallucinating fake jobs or metrics.
               </AccordionContent>
             </AccordionItem>
-            <AccordionItem value="q6">
-              <AccordionTrigger>Does the exported PDF really match the preview?</AccordionTrigger>
-              <AccordionContent>
-                Yes. The exporter renders the exact same template DOM node used for the on-screen
-                preview and captures it into a PDF. There is no separate server-side render, so
-                styles, spacing, and page breaks stay identical.
+            <AccordionItem value="q2" className="rounded-xl border bg-card px-5 py-1">
+              <AccordionTrigger className="font-semibold text-left">
+                How does PDF downloading work?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed">
+                Our PDF engine rasterizes your resume template directly on the client side into a
+                crisp A4 vector document and initiates a direct file download straight into your
+                browser's download folder.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="q3" className="rounded-xl border bg-card px-5 py-1">
+              <AccordionTrigger className="font-semibold text-left">
+                Is my personal data secure?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed">
+                Yes. All your resume records and target job descriptions are protected by database
+                Row-Level Security (RLS). Only your authenticated account can access or modify your
+                files.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="mx-auto max-w-4xl px-6 py-20 text-center">
-        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Stop sending the same resume everywhere.
-        </h2>
-        <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-          Sign in, upload or build a resume, and tailor it to the next job you apply to — without
-          inventing anything you can't back up in an interview.
-        </p>
-        <div className="mt-8 flex justify-center gap-3">
-          <Button asChild size="lg">
-            <Link to="/auth">Get started free</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <a href="#faq">Read the FAQ</a>
-          </Button>
+      {/* Final CTA Banner */}
+      <section className="relative overflow-hidden py-20 bg-primary/5 border-t">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center reveal-on-scroll">
+          <h2 className="text-3xl font-extrabold tracking-tight sm:text-5xl">
+            Ready to build a job-winning ATS resume?
+          </h2>
+          <p className="mt-4 text-base text-muted-foreground">
+            Join thousands of job seekers optimizing their resumes for real results today.
+          </p>
+          <div className="mt-8 flex justify-center gap-4">
+            <Button
+              asChild
+              size="lg"
+              className="h-12 px-8 text-base shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all font-semibold"
+            >
+              <Link to="/auth">
+                Get Started Free <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="border-t bg-background">
-        <div className="mx-auto max-w-6xl px-6 py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8 py-12">
           <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
             <div>
-              <div className="text-base font-bold">Refine</div>
-              <p className="mt-2 text-sm text-muted-foreground">
-                An honest, ATS-friendly resume builder for people applying to real jobs.
+              <div className="flex items-center gap-2 font-bold text-foreground text-base">
+                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground text-xs font-black">
+                  R
+                </span>
+                RefineAI
+              </div>
+              <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
+                The ATS-friendly resume builder that respects the facts.
               </p>
             </div>
             <div>
-              <div className="text-sm font-semibold">Product</div>
-              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <div className="text-xs font-bold uppercase tracking-wider text-foreground">
+                Product
+              </div>
+              <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
                 <li>
                   <a href="#features" className="hover:text-foreground">
                     Features
@@ -512,8 +769,10 @@ function Landing() {
               </ul>
             </div>
             <div>
-              <div className="text-sm font-semibold">Account</div>
-              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <div className="text-xs font-bold uppercase tracking-wider text-foreground">
+                Account
+              </div>
+              <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
                 <li>
                   <Link to="/auth" className="hover:text-foreground">
                     Sign in
@@ -527,21 +786,24 @@ function Landing() {
               </ul>
             </div>
             <div>
-              <div className="text-sm font-semibold">Legal</div>
-              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <div className="text-xs font-bold uppercase tracking-wider text-foreground">
+                Security &amp; Legal
+              </div>
+              <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
                 <li>
-                  <span>Privacy — your data is RLS-protected</span>
+                  <span>RLS Database Protection</span>
                 </li>
                 <li>
-                  <span>Terms — use at your own discretion</span>
+                  <span>Client-Side PDF Processing</span>
                 </li>
               </ul>
             </div>
           </div>
+
           <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-3.5 w-3.5 text-primary" />© {new Date().getFullYear()}{" "}
-              RefineAI
+              RefineAI. All rights reserved.
             </div>
             <div>Designed and Developed by Vaibhav Modi</div>
           </div>

@@ -87,7 +87,9 @@ function AuthedShell() {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none truncate">{fullName}</p>
-                  <p className="text-xs leading-none text-muted-foreground truncate">{user.email}</p>
+                  <p className="text-xs leading-none text-muted-foreground truncate">
+                    {user.email}
+                  </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -96,7 +98,10 @@ function AuthedShell() {
                 <span>Profile</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={signOut} className="cursor-pointer text-destructive focus:text-destructive">
+              <DropdownMenuItem
+                onClick={signOut}
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Sign out</span>
               </DropdownMenuItem>
@@ -152,7 +157,10 @@ function ProfileModal({
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-base font-semibold text-foreground">{fullName}</h3>
               <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-              <Badge variant="secondary" className="mt-1 text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+              <Badge
+                variant="secondary"
+                className="mt-1 text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+              >
                 <ShieldCheck className="mr-1 h-3 w-3" /> Active User
               </Badge>
             </div>
@@ -187,7 +195,11 @@ function ProfileModal({
                 className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 <span className="truncate max-w-[140px]">{user.id}</span>
-                {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? (
+                  <Check className="h-3.5 w-3.5 text-emerald-500" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5" />
+                )}
               </button>
             </div>
           </div>

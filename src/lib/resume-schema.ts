@@ -89,6 +89,84 @@ export function emptyResume(): ResumeData {
   };
 }
 
+export function sanitizeResumeData(data: Partial<ResumeData>): ResumeData {
+  const empty = emptyResume();
+  const info = data.personalInfo ?? empty.personalInfo;
+  return {
+    personalInfo: {
+      fullName: info.fullName?.trim() || "Full Name",
+      email: info.email?.trim() || "",
+      phone: info.phone?.trim() || "",
+      location: info.location?.trim() || "",
+      links: Array.isArray(info.links)
+        ? info.links
+            .filter((l) => l && typeof l === "object")
+            .map((l) => ({ label: l.label?.trim() || "Link", url: l.url?.trim() || "" }))
+        : [],
+    },
+    summary: data.summary?.trim() || "",
+    education: Array.isArray(data.education)
+      ? data.education.map((e) => ({
+          institution: e.institution?.trim() || "University",
+          degree: e.degree?.trim() || "Degree",
+          field: e.field?.trim() || "",
+          startDate: e.startDate?.trim() || "",
+          endDate: e.endDate?.trim() || "",
+          gpa: e.gpa?.trim() || "",
+        }))
+      : [],
+    experience: Array.isArray(data.experience)
+      ? data.experience.map((e) => ({
+          company: e.company?.trim() || "Company",
+          role: e.role?.trim() || "Position",
+          location: e.location?.trim() || "",
+          startDate: e.startDate?.trim() || "2023",
+          endDate: e.endDate?.trim() || "",
+          bullets: Array.isArray(e.bullets)
+            ? e.bullets.filter((b): b is string => typeof b === "string" && b.trim().length > 0)
+            : [],
+        }))
+      : [],
+    projects: Array.isArray(data.projects)
+      ? data.projects.map((p) => ({
+          name: p.name?.trim() || "Project",
+          description: p.description?.trim() || "",
+          techStack: Array.isArray(p.techStack)
+            ? p.techStack.filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+            : [],
+          bullets: Array.isArray(p.bullets)
+            ? p.bullets.filter((b): b is string => typeof b === "string" && b.trim().length > 0)
+            : [],
+          link: p.link?.trim() || "",
+        }))
+      : [],
+    skills: Array.isArray(data.skills)
+      ? data.skills.map((s) => ({
+          category: s.category?.trim() || "Skills",
+          items: Array.isArray(s.items)
+            ? s.items.filter((i): i is string => typeof i === "string" && i.trim().length > 0)
+            : [],
+        }))
+      : [],
+    certifications: Array.isArray(data.certifications)
+      ? data.certifications.map((c) => ({
+          name: c.name?.trim() || "Certification",
+          issuer: c.issuer?.trim() || "",
+          date: c.date?.trim() || "",
+        }))
+      : [],
+    languages: Array.isArray(data.languages)
+      ? data.languages.map((l) => ({
+          name: l.name?.trim() || "Language",
+          proficiency: l.proficiency?.trim() || "",
+        }))
+      : [],
+    achievements: Array.isArray(data.achievements)
+      ? data.achievements.filter((a): a is string => typeof a === "string" && a.trim().length > 0)
+      : [],
+  };
+}
+
 export function sampleResume(): ResumeData {
   return {
     personalInfo: {

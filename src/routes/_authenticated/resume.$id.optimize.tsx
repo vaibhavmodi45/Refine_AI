@@ -53,6 +53,8 @@ import {
   Wand2,
   Loader2,
   Brain,
+  LayoutDashboard,
+  ChevronRight,
 } from "lucide-react";
 import { resumeDataSchema, type ResumeData, type TemplateId } from "@/lib/resume-schema";
 import { scoreResumeAgainstJob, type ScoringResult } from "@/lib/scoring";
@@ -266,12 +268,25 @@ function OptimizePage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Link to="/resume/$id/edit" params={{ id }}>
-          <Button size="sm" variant="ghost">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to editor
-          </Button>
-        </Link>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-1.5 hover:text-foreground font-medium transition-colors"
+          >
+            <LayoutDashboard className="h-4 w-4 text-primary" /> Dashboard
+          </Link>
+          <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+          <Link
+            to="/resume/$id/edit"
+            params={{ id }}
+            className="hover:text-foreground font-medium transition-colors max-w-[200px] truncate"
+          >
+            {q.data?.resume.title || "Resume"}
+          </Link>
+          <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+          <span className="font-semibold text-foreground">ATS Target Optimizer</span>
+        </nav>
         {totalSelected > 0 && (
           <Button size="sm" onClick={() => setSaveOpen(true)}>
             <Wand2 className="mr-2 h-4 w-4" /> Apply {totalSelected} selected

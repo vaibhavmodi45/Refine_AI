@@ -105,17 +105,31 @@ export const saveResumeVersion = createServerFn({ method: "POST" })
     if (data.title) {
       await context.supabase.from("resumes").update({ title: data.title }).eq("id", data.resumeId);
     }
-    if (data.mode === "overwrite" && data.versionId) {
-      const { error } = await context.supabase
-        .from("resume_versions")
-        .update({
-          structured_data: data.data,
-          template: data.template,
-          label: data.label ?? undefined,
-        })
-        .eq("id", data.versionId);
-      if (error) throw new Error(error.message);
-      return { versionId: data.versionId };
+    if (data.mode === "overwrite") {
+      let targetVersionId = data.versionId;
+      if (!targetVersionId) {
+        const { data: curr } = await context.supabase
+          .from("resume_versions")
+          .select("id")
+          .eq("resume_id", data.resumeId)
+          .order("is_current", { ascending: false })
+          .order("version_number", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        targetVersionId = curr?.id;
+      }
+      if (targetVersionId) {
+        const { error } = await context.supabase
+          .from("resume_versions")
+          .update({
+            structured_data: data.data,
+            template: data.template,
+            label: data.label ?? undefined,
+          })
+          .eq("id", targetVersionId);
+        if (error) throw new Error(error.message);
+        return { versionId: targetVersionId };
+      }
     }
     // new
     const { data: existing } = await context.supabase

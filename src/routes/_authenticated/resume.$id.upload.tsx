@@ -2,14 +2,23 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { getResume, saveResumeVersion } from "@/lib/resume.functions";
+import { getResume, saveResumeVersion, createResume } from "@/lib/resume.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Upload, Loader2, Check, AlertTriangle } from "lucide-react";
+import {
+  Upload,
+  Loader2,
+  Check,
+  AlertTriangle,
+  Plus,
+  RefreshCw,
+  LayoutDashboard,
+  ChevronRight,
+} from "lucide-react";
 import { toast } from "sonner";
 import { extractPdfText, extractDocxText, segmentToResume } from "@/lib/resume-parser";
-import { resumeDataSchema, type ResumeData, type TemplateId } from "@/lib/resume-schema";
+import { sanitizeResumeData, type ResumeData, type TemplateId } from "@/lib/resume-schema";
 import { ResumeEditor } from "@/components/resume/ResumeEditor";
 import { TemplateRenderer } from "@/components/resume/TemplateRenderer";
 import {
@@ -35,6 +44,7 @@ function UploadPage() {
   const router = useRouter();
   const get = useServerFn(getResume);
   const save = useServerFn(saveResumeVersion);
+  const create = useServerFn(createResume);
   const q = useQuery({ queryKey: ["resume", id], queryFn: () => get({ data: { resumeId: id } }) });
 
   const [parsing, setParsing] = useState(false);
@@ -70,7 +80,7 @@ function UploadPage() {
       setParsed(data);
       const current = q.data?.versions.find((v) => v.is_current) ?? q.data?.versions[0];
       if (current?.template) setTemplate(current.template as TemplateId);
-      toast.success("Parsed. Review the fields below, then save.");
+      toast.success("Resume parsed successfully! Review your data and choose a save option.");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to parse file";
       setError(msg);
@@ -80,29 +90,49 @@ function UploadPage() {
     }
   }
 
-  async function commit(mode: "overwrite" | "new") {
+  async function commit(mode: "overwrite" | "new_entry" | "new_version") {
     if (!parsed) return;
-    const validated = resumeDataSchema.safeParse(parsed);
-    if (!validated.success) {
-      toast.error("Full name and a valid email are required before saving.");
-      return;
-    }
     setSaving(true);
     try {
+      const cleanedData = sanitizeResumeData(parsed);
+
+      if (mode === "new_entry") {
+        // Create a completely separate new resume entry in the user's dashboard library
+        const resTitle = cleanedData.personalInfo.fullName
+          ? `${cleanedData.personalInfo.fullName} Resume`
+          : "Imported Resume";
+        const created = await create({
+          data: {
+            title: resTitle,
+            template,
+            data: cleanedData,
+          },
+        });
+        toast.success("Created a new separate resume entry!");
+        await router.invalidate();
+        router.navigate({ to: "/resume/$id/edit", params: { id: created.resumeId } });
+        return;
+      }
+
+      // Overwrite current version OR save as new version under existing resume
       const current = q.data?.versions.find((v) => v.is_current) ?? q.data?.versions[0];
       await save({
         data: {
           resumeId: id,
           versionId: mode === "overwrite" ? current?.id : undefined,
           template,
-          data: validated.data,
-          mode,
-          label: mode === "new" ? "Imported" : undefined,
+          data: cleanedData,
+          mode: mode === "overwrite" ? "overwrite" : "new",
+          label: mode === "new_version" ? "Imported Version" : undefined,
         },
       });
-      toast.success(mode === "new" ? "Saved as new version" : "Current version replaced");
+      toast.success(
+        mode === "overwrite" ? "Current resume data replaced!" : "Saved as a new version!",
+      );
+      await router.invalidate();
       router.navigate({ to: "/resume/$id/edit", params: { id } });
     } catch (e) {
+      console.error("[Import Commit Error]", e);
       toast.error(e instanceof Error ? e.message : "Save failed");
     } finally {
       setSaving(false);
@@ -112,11 +142,26 @@ function UploadPage() {
 
   return (
     <div className="space-y-4">
-      <Link to="/resume/$id/edit" params={{ id }}>
-        <Button size="sm" variant="ghost">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back
-        </Button>
-      </Link>
+      <div className="flex items-center justify-between gap-2 border-b pb-3">
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-1.5 hover:text-foreground font-medium transition-colors"
+          >
+            <LayoutDashboard className="h-4 w-4 text-primary" /> Dashboard
+          </Link>
+          <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+          <Link
+            to="/resume/$id/edit"
+            params={{ id }}
+            className="hover:text-foreground font-medium transition-colors max-w-[200px] truncate"
+          >
+            {q.data?.resume.title || "Resume"}
+          </Link>
+          <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+          <span className="font-semibold text-foreground">Import File</span>
+        </nav>
+      </div>
 
       {!parsed && (
         <Card className="p-8 text-center">
@@ -129,8 +174,8 @@ function UploadPage() {
           </div>
           <h2 className="text-lg font-semibold">Upload PDF or DOCX</h2>
           <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-            We'll extract the text and structure it into editable sections. You'll review everything
-            before it saves as a version.
+            We'll extract the text and structure it into editable sections. You can review and save
+            it as a new entry or overwrite your current resume.
           </p>
           <div className="mx-auto mt-5 max-w-xs">
             <Input
@@ -155,12 +200,12 @@ function UploadPage() {
       {parsed && (
         <>
           <Card className="flex flex-wrap items-center gap-3 p-4">
-            <div className="flex items-center gap-2 text-sm">
-              <Check className="h-4 w-4 text-primary" />
-              Parsed successfully. Review and edit anything the parser missed before saving.
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Check className="h-4 w-4 text-emerald-500" />
+              Resume parsed successfully! Review the extracted fields below before saving.
             </div>
-            <div className="ml-auto flex gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setParsed(null)}>
+            <div className="ml-auto flex flex-wrap gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setParsed(null)} disabled={saving}>
                 Upload a different file
               </Button>
               <Button
@@ -169,10 +214,18 @@ function UploadPage() {
                 disabled={saving}
                 onClick={() => setConfirm(true)}
               >
-                Replace current version
+                <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Overwrite current resume
               </Button>
-              <Button size="sm" disabled={saving} onClick={() => commit("new")}>
-                Save as new version
+              <Button size="sm" disabled={saving} onClick={() => commit("new_entry")}>
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> Saving...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="mr-1.5 h-3.5 w-3.5" /> Save as new entry
+                  </>
+                )}
               </Button>
             </div>
           </Card>
@@ -199,15 +252,21 @@ function UploadPage() {
       <AlertDialog open={confirm} onOpenChange={setConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Replace current version?</AlertDialogTitle>
+            <AlertDialogTitle>Overwrite current resume data?</AlertDialogTitle>
             <AlertDialogDescription>
-              This overwrites the contents of the currently active version with the parsed data. To
-              keep the original safe, use “Save as new version” instead.
+              This will update your active resume version with the newly parsed content. To create a
+              separate new resume entry instead, choose “Save as new entry”.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => commit("overwrite")}>Replace</AlertDialogAction>
+            <AlertDialogAction
+              disabled={saving}
+              onClick={() => commit("overwrite")}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              {saving ? "Overwriting..." : "Confirm Overwrite"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
